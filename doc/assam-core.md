@@ -17,9 +17,24 @@ Bitlang Low
     -> Bitlang VM Backend
     -> Assam Core / Bitlang VM Assembly
     -> Bitlang VM
+    -> x64 / ARM64 / RISC-V architecture translation
 ```
 
 Because Bitlang Low is a primary producer, Core must be easy to generate deterministically and must not require a backend to synthesize human-oriented high-level ASSAM features.
+
+## Required architecture portability
+
+Assam Core is intentionally designed as a small common instruction layer that can be translated mechanically to multiple real ISAs.
+
+The mandatory initial architecture targets are:
+
+- x64 / x86-64
+- ARM64 / AArch64
+- RISC-V
+
+The mapping for these targets must be described primarily by **JSON translation tables**. A mapping entry may expand one Core instruction into multiple target instructions when necessary, but the meaning of the Core operation must remain small enough that translation is mechanical rather than a second high-level compiler.
+
+Support for additional targets such as other ISAs, FPGA-oriented instruction sets, or custom processors may be added by supplying additional mapping definitions and the minimum target-specific encoder/ABI support required by that target.
 
 ## Core design rules
 
@@ -30,8 +45,47 @@ Because Bitlang Low is a primary producer, Core must be easy to generate determi
 5. No implicit ownership, cleanup, allocation, dynamic dispatch, closure capture, or other high-level language behavior exists in Core.
 6. Pseudo-instructions and convenience syntax may exist in full ASSAM only when they lower deterministically to Core.
 7. Core instruction semantics are versioned and machine-readable.
-8. Parsers and VMs should consume the same canonical instruction definition rather than maintaining unrelated opcode tables.
+8. Parsers, VMs, and translators should consume the same canonical instruction definition rather than maintaining unrelated opcode tables.
 9. Target translators may map one Core operation to multiple target instructions when the target ISA cannot express the required semantics directly.
+10. A new Core instruction must be simple enough to define mappings for x64, ARM64, and RISC-V, unless it is an explicitly specified runtime/VM ABI primitive.
+11. If a proposed operation requires substantial architecture-specific semantic lowering, it must normally be decomposed into simpler Core instructions before architecture translation.
+12. Core must not contain an instruction merely because it is convenient for the ASSAM interpreter or for one particular CPU architecture.
+
+## Instruction simplicity gate
+
+Assam Core is deliberately closer to a portable micro-operation / RISC-like layer than to a feature-rich assembly language.
+
+Before an instruction is admitted to Core, its design review must answer:
+
+- Can its operands and effects be stated without hidden high-level state?
+- Can x64, ARM64, and RISC-V mappings be expressed in JSON as a small instruction sequence plus explicit operand adaptation?
+- Are all memory effects visible?
+- Are all control-flow effects visible?
+- Are failure/trap conditions explicit?
+- Would a target translator need to reconstruct source-language concepts to implement it?
+
+If the final answer is no for the mapping questions or yes for the reconstruction question, the operation should normally be lowered into smaller Core operations instead.
+
+Examples of functionality that belongs outside Core unless reduced to primitives include high-level terminal/device commands, implicit object operations, compound resource management, closure operations, language-level allocation policy, or complex convenience instructions. Full ASSAM may expose such features as pseudo-instructions, but they must lower before Core translation.
+
+## JSON architecture mapping contract
+
+The architecture mapping data must be machine-readable and versioned.
+
+At minimum, each target mapping must be able to describe:
+
+- Core opcode/profile version;
+- target architecture/profile;
+- operand correspondence and constraints;
+- one-to-one or one-to-many target instruction templates;
+- immediate/register restrictions;
+- required temporary/scratch resources when expressible declaratively;
+- condition-code or branch relation mapping;
+- width/signedness variants;
+- unsupported combinations that require prior Core decomposition;
+- target ABI/helper call identifiers where a defined runtime boundary is required.
+
+The mapping table is not a place to embed an unrestricted programming language. If a mapping requires complex semantic code, Core should first be simplified or decomposed.
 
 ## Requirements inherited from Bitlang Low lowering
 
@@ -60,6 +114,17 @@ The existing ASSAM text form remains the starting point:
 - one canonical spelling should be emitted by generators even if the parser accepts compatible aliases.
 
 The exact grammar, operand kinds, opcode set, profile/version marker, and error rules are to be formalized before the profile is considered stable.
+
+## Architecture translation acceptance criteria
+
+Assam Core is not considered stable until:
+
+- x64 mapping JSON exists and passes translation fixtures;
+- ARM64 mapping JSON exists and passes translation fixtures;
+- RISC-V mapping JSON exists and passes translation fixtures;
+- every ordinary Core opcode has required mapping coverage for all three architectures or is explicitly classified as a runtime/VM ABI primitive;
+- CI/schema validation rejects an uncovered ordinary Core opcode;
+- representative programs produce semantically equivalent results in the reference VM and translated target executions/tests where the target test environment is available.
 
 ## Compatibility rule
 

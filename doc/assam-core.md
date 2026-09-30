@@ -34,7 +34,9 @@ The mandatory initial architecture targets are:
 
 The mapping for these targets must be described primarily by **JSON translation tables**. A mapping entry may expand one Core instruction into multiple target instructions when necessary, but the meaning of the Core operation must remain small enough that translation is mechanical rather than a second high-level compiler.
 
-Support for additional targets such as other ISAs, FPGA-oriented instruction sets, or custom processors may be added by supplying additional mapping definitions and the minimum target-specific encoder/ABI support required by that target.
+Additional targets are intentionally open-ended. Assam does not need first-party code for every custom CPU or FPGA design. A developer may add support for an FPGA-oriented ISA, soft-core CPU, experimental processor, or other custom target by writing a compatible JSON mapping table for that target.
+
+The intended extension model is therefore **data-driven**: if the target can express Assam Core operations, the developer supplies the correspondence table directly. Such community/custom targets are not part of the mandatory x64 / ARM64 / RISC-V acceptance gate unless they are later promoted to first-party supported targets.
 
 ## Core design rules
 
@@ -86,6 +88,14 @@ At minimum, each target mapping must be able to describe:
 - target ABI/helper call identifiers where a defined runtime boundary is required.
 
 The mapping table is not a place to embed an unrestricted programming language. If a mapping requires complex semantic code, Core should first be simplified or decomposed.
+
+### Custom / FPGA target extension
+
+The generic mapping system must allow developers to author additional target tables without modifying Assam Core itself.
+
+For example, an FPGA developer defining a custom instruction set should be able to write a target mapping JSON that directly states how Core operations map to that instruction set. Assam does not require that such a target be upstreamed or implemented as a dedicated built-in architecture module merely to use it.
+
+Custom mappings are responsible for declaring their own target/profile identity and supported Core coverage. Unsupported Core operations are diagnosed explicitly rather than silently approximated.
 
 ## Requirements inherited from Bitlang Low lowering
 

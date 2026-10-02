@@ -38,6 +38,53 @@ Additional targets are intentionally open-ended. Assam does not need first-party
 
 The intended extension model is therefore **data-driven**: if the target can express Assam Core operations, the developer supplies the correspondence table directly. Such community/custom targets are not part of the mandatory x64 / ARM64 / RISC-V acceptance gate unless they are later promoted to first-party supported targets.
 
+
+## Future official bytecode targets
+
+After the mandatory x64 / ARM64 / RISC-V architecture translators are stable, Assam should also provide official translation paths for:
+
+- WebAssembly (Wasm)
+- JVM bytecode
+
+These are **later-phase targets** and are not part of the initial Assam Core stability/acceptance gate.
+
+Wasm and JVM bytecode are not treated as ordinary native-ISA JSON mappings. Both are stack-oriented execution formats, and Wasm additionally requires structured control flow while JVM bytecode has verifier/type-stack and class/method constraints.
+
+The intended translation model is:
+
+```text
+Assam Core
+    -> target-specific normalization / CFG + stack lowering
+    -> Wasm or JVM bytecode mapping/emission
+```
+
+The generic JSON mapping data may still describe simple arithmetic, comparison, conversion, and other opcode correspondences where useful. However, target-specific lowering is permitted for structural requirements that cannot be represented safely as a simple instruction table.
+
+This does not weaken the Core simplicity rule. The Wasm/JVM translators must adapt the simple Core program to the target model; Assam Core must not grow Wasm-specific or JVM-specific compound instructions merely to simplify those translators.
+
+### WebAssembly
+
+The future Wasm translator must handle, at minimum:
+
+- Core register/value flow to Wasm locals/operand stack;
+- arbitrary Core CFG to valid structured Wasm control flow or another semantics-preserving lowering;
+- linear-memory mapping for guest memory;
+- calls, returns, traps, and runtime helpers;
+- deterministic integer-width semantics required by the selected Assam/Bitlang profile.
+
+### JVM bytecode
+
+The future JVM-bytecode translator must handle, at minimum:
+
+- Core register/value flow to JVM locals/operand stack;
+- JVM verifier-compatible stack and type states;
+- labels, branches, calls, and returns;
+- guest memory through an explicit runtime representation rather than pretending JVM object references are raw guest pointers;
+- generated class/method structure and runtime helper boundaries;
+- semantics-preserving lowering for operations not directly represented by JVM bytecode.
+
+Neither target translator may reconstruct Bitlang source-level ownership, borrow, class, or other high-level semantics.
+
 ## Core design rules
 
 1. One instruction has one explicit low-level effect.

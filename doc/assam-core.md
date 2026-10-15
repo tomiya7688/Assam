@@ -149,6 +149,8 @@ Custom mappings are responsible for declaring their own target/profile identity 
 Assam Core must be sufficient for a Bitlang Low backend to preserve:
 
 - arbitrary semantic integer widths and signedness, either directly or through explicit lowering sequences;
+- Bitlang unbounded-width integer forms (`Int<Radix>x*` / `Uint<Radix>x*`) lowered to an explicit dynamic-limb/runtime-helper ABI when needed rather than pretending a single target register has infinite width; `x0` is not an unlimited-width alias;
+- zero-payload string/array/aggregate values lowered without inferring guest pointer validity, element count, or logical identity from zero bytes of storage; any necessary descriptor/helper operations remain explicit;
 - checked overflow behavior;
 - deterministic logical/arithmetic shifts with validated shift counts;
 - comparisons and explicit conditional/unconditional branches;

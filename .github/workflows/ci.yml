@@ -1,0 +1,59 @@
+name: ASSAM checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: assam-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.10', '3.13']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: stable
+          cache: false # standard-library-only module; no go.sum
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Python dependencies and package build/install
+        run: |
+          python -m pip install pytest==9.0.2
+          python -m pip install --no-deps .
+      - name: Go format, analysis and tests
+        run: |
+          test -z "$(gofmt -l core cmd)"
+          go vet ./...
+          go test ./...
+      - name: Python legacy, shared golden and Go differential tests
+        run: |
+          python -m compileall -q assam tools tests
+          python -m pytest -q
+      - name: Installed Python package smoke (outside source tree)
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -c 'from assam import VM, parse_program; assert VM(parse_program("Move r0 2\nAdd r1 r0 3\nHalt")).run()["r1"] == 5'
+          python -m assam.cli --help
+      - name: Go CLI smoke
+        run: |
+          go run ./cmd/assam-core -profile assam-core/v1-draft.1 examples/core/sum.assam > core-result.json
+          python -c 'import json; r=json.load(open("core-result.json")); assert r["status"] == "halted" and r["steps"] == 33 and r["registers"][3] == "0x0000000000000037"'
+      - name: Race detection and bounded parser fuzzing
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        run: |
+          go test -race ./...
+          go test ./core -run '^$' -fuzz FuzzParse -fuzztime 5s -parallel 2

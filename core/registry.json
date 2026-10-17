@@ -1,0 +1,210 @@
+{
+  "profile": "assam-core/v1-draft.1",
+  "status": "experimental-subset",
+  "register_count": 32,
+  "register_bits": 64,
+  "required_translation_targets": [
+    "x64",
+    "arm64",
+    "riscv"
+  ],
+  "opcodes": {
+    "const": {
+      "operands": [
+        "write_reg",
+        "immediate"
+      ],
+      "effect": "constant",
+      "traps": []
+    },
+    "add": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "add",
+      "traps": []
+    },
+    "sub": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "sub",
+      "traps": []
+    },
+    "mul": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "mul",
+      "traps": []
+    },
+    "and": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "and",
+      "traps": []
+    },
+    "or": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "or",
+      "traps": []
+    },
+    "xor": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "xor",
+      "traps": []
+    },
+    "shl": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "shl",
+      "traps": []
+    },
+    "shr": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "shr",
+      "traps": []
+    },
+    "sar": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "sar",
+      "traps": []
+    },
+    "divu": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "divu",
+      "traps": [
+        "division_by_zero"
+      ]
+    },
+    "divs": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "divs",
+      "traps": [
+        "division_by_zero"
+      ]
+    },
+    "remu": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "remu",
+      "traps": [
+        "division_by_zero"
+      ]
+    },
+    "rems": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "rems",
+      "traps": [
+        "division_by_zero"
+      ]
+    },
+    "eq": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "eq",
+      "traps": []
+    },
+    "ltu": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "ltu",
+      "traps": []
+    },
+    "lts": {
+      "operands": [
+        "write_reg",
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "lts",
+      "traps": []
+    },
+    "brz": {
+      "operands": [
+        "read_reg",
+        "label"
+      ],
+      "effect": "branch_zero",
+      "traps": []
+    },
+    "brnz": {
+      "operands": [
+        "read_reg",
+        "label"
+      ],
+      "effect": "branch_nonzero",
+      "traps": []
+    },
+    "jump": {
+      "operands": [
+        "label"
+      ],
+      "effect": "jump",
+      "traps": []
+    },
+    "halt": {
+      "operands": [],
+      "effect": "halt",
+      "traps": []
+    },
+    "trap": {
+      "operands": [
+        "immediate"
+      ],
+      "effect": "trap",
+      "traps": [
+        "explicit_trap"
+      ]
+    }
+  }
+}

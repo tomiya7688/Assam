@@ -1,0 +1,8 @@
+; Sum 1..10 in r3. Requires assam-core/v1-draft.1.
+const r1, 10
+const r2, 1
+loop:
+    add r3, r3, r1
+    sub r1, r1, r2
+    brnz r1, loop
+halt

@@ -1,0 +1,4 @@
+# Keep Go source identical across checkouts; gofmt emits LF on every host.
+*.go text eol=lf
+go.mod text eol=lf
+go.sum text eol=lf

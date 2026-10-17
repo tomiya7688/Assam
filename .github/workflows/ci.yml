@@ -36,7 +36,11 @@ jobs:
           python -m pip install --no-deps .
       - name: Go format, analysis and tests
         run: |
-          test -z "$(gofmt -l core cmd)"
+          unformatted="$(gofmt -l core cmd)"
+          if [ -n "$unformatted" ]; then
+            printf 'Go files need gofmt:\n%s\n' "$unformatted"
+            exit 1
+          fi
           go vet ./...
           go test ./...
       - name: Python legacy, shared golden and Go differential tests

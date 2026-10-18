@@ -1,0 +1,167 @@
+{
+  "profile": "assam-core/v1-draft.2",
+  "extends": "assam-core/v1-draft.1",
+  "status": "experimental-subset",
+  "memory": {
+    "address_bits": 64,
+    "byte_order": "little",
+    "unaligned": true,
+    "bounds_trap": "memory_out_of_bounds"
+  },
+  "opcodes": {
+    "load8u": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 1,
+        "signed": false
+      }
+    },
+    "load8s": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 1,
+        "signed": true
+      }
+    },
+    "load16u": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 2,
+        "signed": false
+      }
+    },
+    "load16s": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 2,
+        "signed": true
+      }
+    },
+    "load32u": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 4,
+        "signed": false
+      }
+    },
+    "load32s": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 4,
+        "signed": true
+      }
+    },
+    "load64": {
+      "operands": [
+        "write_reg",
+        "read_reg"
+      ],
+      "effect": "load",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 8,
+        "signed": false
+      }
+    },
+    "store8": {
+      "operands": [
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "store",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 1,
+        "signed": false
+      }
+    },
+    "store16": {
+      "operands": [
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "store",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 2,
+        "signed": false
+      }
+    },
+    "store32": {
+      "operands": [
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "store",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 4,
+        "signed": false
+      }
+    },
+    "store64": {
+      "operands": [
+        "read_reg",
+        "read_reg"
+      ],
+      "effect": "store",
+      "traps": [
+        "memory_out_of_bounds"
+      ],
+      "memory": {
+        "bytes": 8,
+        "signed": false
+      }
+    }
+  }
+}

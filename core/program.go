@@ -19,12 +19,14 @@ type instruction struct {
 	effect string
 	args   []uint64
 	line   int
+	memory *memoryDefinition
 }
 
 // Program is immutable outside this package. Its zero value is not executable.
 type Program struct {
 	code      []instruction
 	canonical string
+	profile   string
 }
 
 // Canonical returns lowercase comma-separated text, preserving labels and order.
@@ -42,17 +44,17 @@ type pendingLabel struct {
 
 // Parse validates the entire program, including unreachable instructions/labels.
 func Parse(source, profile string) (*Program, error) {
-	if profile != Profile {
+	if profile != Profile && profile != MemoryProfile {
 		return nil, fmt.Errorf("unsupported profile %q", profile)
 	}
 	if len(source) > MaxSourceBytes || !utf8.ValidString(source) || strings.ContainsRune(source, 0) {
 		return nil, fmt.Errorf("invalid source encoding or source exceeds %d bytes", MaxSourceBytes)
 	}
-	r, err := loadRegistry()
+	r, err := registryForProfile(profile)
 	if err != nil {
 		return nil, err
 	}
-	p := &Program{}
+	p := &Program{profile: profile}
 	labels := map[string]int{}
 	var pending []pendingLabel
 	var canonical []string
@@ -91,7 +93,7 @@ func Parse(source, profile string) (*Program, error) {
 		if len(args) != len(d.Operands) {
 			return fail("wrong operand count; use commas")
 		}
-		ins := instruction{effect: d.Effect, args: make([]uint64, len(args)), line: line}
+		ins := instruction{effect: d.Effect, args: make([]uint64, len(args)), line: line, memory: d.Memory}
 		for i, kind := range d.Operands {
 			a := strings.Trim(args[i], " \t")
 			args[i] = a

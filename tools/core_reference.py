@@ -10,6 +10,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = json.loads((ROOT / "core/registry.json").read_text(encoding="utf-8"))
 PROFILE = REGISTRY["profile"]
+MEMORY_EXTENSION = json.loads((ROOT / "core/registry-memory.json").read_text(encoding="utf-8"))
+MEMORY_PROFILE = "assam-core/v1-draft.2"
+MAX_MEMORY_BYTES = 16 << 20
 MASK = (1 << 64) - 1
 MAX_SOURCE_BYTES = 1 << 20
 LABEL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
@@ -34,9 +37,32 @@ def immediate(text):
     return (-value if negative else value) & MASK
 
 
-def parse(source, profile):
-    if profile != PROFILE:
+def registry_for_profile(profile):
+    if profile == PROFILE:
+        return REGISTRY
+    if profile != MEMORY_PROFILE:
         raise ValueError("unsupported profile")
+    ext = MEMORY_EXTENSION
+    if (ext["profile"] != MEMORY_PROFILE or ext["extends"] != PROFILE
+            or ext["status"] != "experimental-subset"
+            or ext["memory"] != dict(address_bits=64, byte_order="little",
+                                     unaligned=True, bounds_trap="memory_out_of_bounds")
+            or not ext["opcodes"] or set(ext["opcodes"]) & set(REGISTRY["opcodes"])):
+        raise ValueError("invalid memory registry contract")
+    for definition in ext["opcodes"].values():
+        effect, memory = definition["effect"], definition["memory"]
+        kinds = ["write_reg", "read_reg"] if effect == "load" else ["read_reg", "read_reg"]
+        if (effect not in ("load", "store") or definition["operands"] != kinds
+                or memory["bytes"] not in (1, 2, 4, 8)
+                or (effect == "store" and memory["signed"])
+                or definition["traps"] != ["memory_out_of_bounds"]):
+            raise ValueError("invalid memory opcode")
+    return dict(REGISTRY, profile=profile, memory=ext["memory"],
+                opcodes=dict(REGISTRY["opcodes"], **ext["opcodes"]))
+
+
+def parse(source, profile):
+    registry = registry_for_profile(profile)
     if len(source.encode("utf-8")) > MAX_SOURCE_BYTES or "\x00" in source:
         raise ValueError("invalid source encoding or source too large")
     code, labels, pending, canonical = [], {}, [], []
@@ -53,7 +79,7 @@ def parse(source, profile):
             continue
         parts = re.split(r"[ \t]", text, maxsplit=1)
         name = parts[0]
-        definition = REGISTRY["opcodes"].get(name)
+        definition = registry["opcodes"].get(name)
         if definition is None:
             raise ValueError(f"line {line}: unknown or non-canonical opcode")
         tail = parts[1].strip(" \t") if len(parts) == 2 else ""
@@ -76,7 +102,7 @@ def parse(source, profile):
                 args.append(0)
             else:
                 raise ValueError("unsupported registry operand")
-        code.append((definition["effect"], args, line))
+        code.append((definition["effect"], args, line, definition.get("memory")))
         canonical.append(name + (" " + ", ".join(tokens) if tokens else ""))
     if not code:
         raise ValueError("empty program")
@@ -97,14 +123,27 @@ def signed(value):
 
 
 def run(code, budget):
+    return _run(code, budget, bytearray(), False)
+
+
+def run_memory(code, budget, initial):
+    if not isinstance(initial, (bytes, bytearray)) or len(initial) > MAX_MEMORY_BYTES:
+        raise ValueError("invalid initial memory")
+    return _run(code, budget, bytearray(initial), True)
+
+
+def _run(code, budget, memory, include_memory):
     if type(budget) is not int or not 0 <= budget <= MASK:
         raise ValueError("budget must be uint64")
     regs = [0] * 32
     pc = steps = 0
 
     def snapshot(status, code="", line=0):
-        return dict(status=status, pc=pc, steps=steps, code=code, line=line,
-                    registers=[f"0x{x:016x}" for x in regs])
+        result = dict(status=status, pc=pc, steps=steps, code=code, line=line,
+                      registers=[f"0x{x:016x}" for x in regs])
+        if include_memory:
+            result["memory_hex"] = memory.hex()
+        return result
 
     if not code:
         return snapshot("invalid_program")
@@ -113,11 +152,23 @@ def run(code, budget):
             return snapshot("step_limit")
         if not 0 <= pc < len(code):
             return snapshot("trap", "invalid_pc")
-        effect, args, line = code[pc]
+        effect, args, line, memory_def = code[pc]
         steps += 1
         next_pc, value = pc + 1, None
         if effect == "constant":
             value = args[1]
+        elif effect in ("load", "store"):
+            address = regs[args[1] if effect == "load" else args[0]]
+            width = memory_def["bytes"]
+            # Python's unbounded addition is independent of Go's subtraction check.
+            if address + width > len(memory):
+                return snapshot("trap", "memory_out_of_bounds", line)
+            if effect == "load":
+                value = int.from_bytes(memory[address:address + width], "little",
+                                       signed=memory_def["signed"])
+            else:
+                payload = regs[args[1]] & ((1 << (width * 8)) - 1)
+                memory[address:address + width] = payload.to_bytes(width, "little")
         elif effect in ("branch_zero", "branch_nonzero"):
             take = regs[args[0]] == 0
             if effect == "branch_nonzero":

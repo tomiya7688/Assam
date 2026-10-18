@@ -56,8 +56,16 @@ jobs:
         run: |
           go run ./cmd/assam-core -profile assam-core/v1-draft.1 examples/core/sum.assam > core-result.json
           python -c 'import json; r=json.load(open("core-result.json")); assert r["status"] == "halted" and r["steps"] == 33 and r["registers"][3] == "0x0000000000000037"'
-      - name: Race detection and bounded parser fuzzing
+      - name: Memory CLI smoke
+        run: |
+          go run ./cmd/assam-core -profile assam-core/v1-draft.2 -memory-bytes 9 -dump-memory examples/core/memory.assam > memory-result.json
+          python -c 'import json; r=json.load(open("memory-result.json")); assert r["status"] == "halted" and r["steps"] == 6 and r["registers"][3] == "0xffffffff89abcdef" and r["registers"][4] == "0x0000000089abcdef" and r["memory_hex"] == "00efcdab8900000000"'
+      - name: 32-bit guest-address regression
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        run: GOARCH=386 CGO_ENABLED=0 go test ./...
+      - name: Race detection and bounded parser/memory fuzzing
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
         run: |
           go test -race ./...
           go test ./core -run '^$' -fuzz FuzzParse -fuzztime 5s -parallel 2
+          go test ./core -run '^$' -fuzz FuzzMemoryAccess -fuzztime 5s -parallel 2

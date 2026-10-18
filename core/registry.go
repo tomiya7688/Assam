@@ -1,5 +1,5 @@
-// Package core implements an experimental arithmetic/control-flow Core subset.
-// It is not a stable Core v1 implementation; see doc/core-bootstrap.md.
+// Package core implements experimental, versioned Core subsets.
+// See doc/core-bootstrap.md and doc/core-memory.md; Core v1 is not stable.
 package core
 
 import (
@@ -18,9 +18,10 @@ const Profile = "assam-core/v1-draft.1"
 const MaxSourceBytes = 1 << 20
 
 type definition struct {
-	Operands []string `json:"operands"`
-	Effect   string   `json:"effect"`
-	Traps    []string `json:"traps"`
+	Operands []string          `json:"operands"`
+	Effect   string            `json:"effect"`
+	Traps    []string          `json:"traps"`
+	Memory   *memoryDefinition `json:"memory,omitempty"`
 }
 type registry struct {
 	Profile       string                `json:"profile"`
@@ -29,6 +30,7 @@ type registry struct {
 	RegisterBits  int                   `json:"register_bits"`
 	Targets       []string              `json:"required_translation_targets"`
 	Opcodes       map[string]definition `json:"opcodes"`
+	Memory        *memoryContract       `json:"memory,omitempty"`
 }
 
 // Schema returns a copy so callers cannot mutate the embedded contract.

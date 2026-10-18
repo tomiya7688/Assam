@@ -1,0 +1,7 @@
+; draft.2: unaligned store, signed and unsigned loads from the same bytes.
+const r1, 1
+const r2, 0x89abcdef
+store32 r1, r2
+load32s r3, r1
+load32u r4, r1
+halt

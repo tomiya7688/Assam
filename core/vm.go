@@ -16,6 +16,11 @@ type Result struct {
 // Run starts a fresh machine. A budget is mandatory and counts attempted
 // instructions, including halt/trap. Reaching halt on the final step succeeds.
 func Run(p *Program, budget uint64) Result {
+	return run(p, budget, nil)
+}
+
+// run exclusively owns memory for this execution. Bounds checks precede access.
+func run(p *Program, budget uint64, memory []byte) Result {
 	var regs [32]uint64
 	pc := 0
 	var steps uint64
@@ -45,6 +50,35 @@ func Run(p *Program, budget uint64) Result {
 		switch ins.effect {
 		case "constant":
 			value, write = a[1], true
+		case "load", "store":
+			m := ins.memory
+			if m == nil || len(a) != 2 {
+				return snapshot("internal_error", "invalid_memory_effect", ins.line)
+			}
+			address := regs[a[0]]
+			if ins.effect == "load" {
+				address = regs[a[1]]
+			}
+			if !memoryRangeValid(uint64(len(memory)), address, m.Bytes) {
+				return snapshot("trap", "memory_out_of_bounds", ins.line)
+			}
+			// The complete access is validated before index conversion or writes.
+			start := int(address)
+			if ins.effect == "load" {
+				for i := uint64(0); i < m.Bytes; i++ {
+					value |= uint64(memory[start+int(i)]) << (8 * i)
+				}
+				if m.Signed {
+					shift := 64 - 8*m.Bytes
+					value = uint64(int64(value<<shift) >> shift)
+				}
+				write = true
+			} else {
+				data := regs[a[1]]
+				for i := uint64(0); i < m.Bytes; i++ {
+					memory[start+int(i)] = byte(data >> (8 * i))
+				}
+			}
 		case "branch_zero", "branch_nonzero":
 			take := regs[a[0]] == 0
 			if ins.effect == "branch_nonzero" {

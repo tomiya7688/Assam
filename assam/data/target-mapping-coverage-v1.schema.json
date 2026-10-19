@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:assam:schemas:target-mapping-coverage:v1",
+  "title": "ASSAM target mapping coverage manifest v1",
+  "description": "Declares the intended coverage of Core target-mapping hooks. It does not define executable target instruction mappings.",
+  "type": "object",
+  "required": ["schema_version", "core_profile", "registry_schema_version", "target", "coverage"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "core_profile": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "const": "Assam Core"},
+        "version": {"type": "string", "const": "draft"}
+      },
+      "additionalProperties": false
+    },
+    "registry_schema_version": {"type": "integer", "const": 2},
+    "target": {
+      "type": "object",
+      "required": ["architecture", "profile"],
+      "properties": {
+        "architecture": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "profile": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      },
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target_mapping_id", "disposition"],
+        "properties": {
+          "target_mapping_id": {
+            "type": "string",
+            "pattern": "^assam\\.core\\.draft\\.[a-z][a-z0-9_]*$"
+          },
+          "disposition": {"enum": ["in_scope", "out_of_scope"]},
+          "reason": {"type": "string", "minLength": 1, "pattern": "\\S"}
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"disposition": {"const": "out_of_scope"}}, "required": ["disposition"]},
+            "then": {"required": ["reason"]}
+          }
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

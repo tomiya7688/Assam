@@ -1,5 +1,7 @@
 # Assam Core Profile
 
+Language: [日本語](../jp/assam-core.md) | English
+
 Status: Draft
 
 Assam Core is the strict low-level profile of ASSAM used by execution targets such as Bitlang VM.
@@ -121,6 +123,20 @@ Examples of functionality that belongs outside Core unless reduced to primitives
 
 The architecture mapping data must be machine-readable and versioned.
 
+As a first step before defining translation templates, the [target-mapping-coverage-v1.schema.json](../../assam/data/target-mapping-coverage-v1.schema.json) defines a coverage-manifest format. For each target/profile it declares each `target_mapping_id` as `in_scope` or `out_of_scope`; the latter requires a reason. `in_scope` does not mean a translation sequence has been implemented. This schema alone does not check completeness against the registry or duplicate IDs.
+
+`assam check-target-coverage <manifest.json>` checks the required manifest v1 structure, then compares it with the bundled Core registry to ensure every Core hook ID appears exactly once, with no unknown IDs or duplicates. Use `--registry <registry.json>` to check against another registry, or `--format json` for machine-readable output. The result's `validation_scope` is `coverage_declarations_only`; mapping implementation and executability are not checked.
+
+`assam check-target-matrix <x64.json> <arm64.json> <riscv.json>` checks each manifest's coverage declaration and requires all three initial targets (aliases `x86-64`, `AArch64`, and `RISC-V`). Custom-target manifests may also be supplied; use `--format json` for machine-readable output. The result's `validation_scope` is `coverage_declarations_only`; it does not prove that an `in_scope` translation is implemented or executable.
+
+`assam scaffold-target-coverage <architecture> <profile>` prints a JSON template containing every Core hook ID. Every entry defaults to reasoned `out_of_scope`, so authors must review and explicitly reclassify each item. Template generation and matrix checking do not claim that mappings are implemented.
+
+The minimal structure for mapping data is draft-defined by [target-mapping-v1.schema.json](../../assam/data/target-mapping-v1.schema.json). Each Core hook ID can declare a sequence of target opcodes whose operands reference Core operands, immediates, target registers, scratch names, or symbols. This schema validates JSON shape only. It does not validate semantic equivalence, register allocation, constraints, branch conditions, width/signedness variants, ABI helpers, or completeness against the Core registry. It is not an executable translation contract, and an `in_scope` coverage declaration still does not mean that a mapping is implemented.
+
+`assam check-target-mappings <mapping.json>` checks this structure, Core registry hook references, and duplicate IDs. Each zero-based `core_operand.index` must be less than the corresponding Core instruction's operand count, including when another registry is selected with `--registry`. Machine-readable output via `--format json` includes `validation_scope: "mapping_structure_and_registry_references_only"`. Omitted Core hooks are listed in JSON and counted in text output. This command does not validate mapping semantics or executability.
+
+`assam check-target-mappings <mapping.json> --coverage <manifest.json>` also validates the complete manifest against the same registry and requires the mapping hook set to equal its `in_scope` declarations. Missing `in_scope` sequences and sequences for `out_of_scope` hooks are errors. Architecture identities use the same aliases as the matrix checker; profile strings must match exactly. JSON output uses `validation_scope: "mapping_structure_registry_references_and_coverage_only"` and includes the declaration report under `coverage`. This checks sequence presence and reference consistency; semantic and execution equivalence still require separate verification.
+
 At minimum, each target mapping must be able to describe:
 
 - Core opcode/profile version;
@@ -149,8 +165,8 @@ Custom mappings are responsible for declaring their own target/profile identity 
 Assam Core must be sufficient for a Bitlang Low backend to preserve:
 
 - arbitrary semantic integer widths and signedness, either directly or through explicit lowering sequences;
-- Bitlang unbounded-width integer forms (`Int<Radix>x*` / `Uint<Radix>x*`) lowered to an explicit dynamic-limb/runtime-helper ABI when needed rather than pretending a single target register has infinite width; `x0` is not an unlimited-width alias;
-- zero-payload string/array/aggregate values lowered without inferring guest pointer validity, element count, or logical identity from zero bytes of storage; any necessary descriptor/helper operations remain explicit;
+- preserve `Int<Radix>x*` / `Uint<Radix>x*` as arbitrary-precision integers, lowering explicitly to dynamic limbs/runtime helpers where needed; do not substitute a fixed-width register, invented finite width, or truncation. Numeric `x0` is invalid, not an alias for `x*`. Reject `Float<Radix>x*` until its semantics are defined; never substitute a host float;
+- distinguish zero-payload semantic validity from physical storage size. A zero-length array has zero elements; an array of N zero-payload elements retains N logical elements and normal bounds checks. Do not substitute physical address arithmetic for logical indexing when stride is zero. Preserve observable identity/Ref/borrow/lifetime rules, do not assume heap allocation or unique physical addresses, and keep any required descriptor/helper explicit;
 - checked overflow behavior;
 - deterministic logical/arithmetic shifts with validated shift counts;
 - comparisons and explicit conditional/unconditional branches;
@@ -161,6 +177,8 @@ Assam Core must be sufficient for a Bitlang Low backend to preserve:
 - explicit helper calls when a semantic operation cannot be represented by one instruction.
 
 Bitlang ownership, borrow, Ref, cleanup, class, and closure semantics should already be validated/lowered before Core. Core executes the resulting explicit operations and control flow; it does not reimplement those high-level analyses.
+
+These type semantics are inherited rather than redefined by Assam. See Bitlang Low's [numeric types](https://github.com/tomiya7688/Bitlang_low/blob/main/docs/numeric-types.md), [language specification](https://github.com/tomiya7688/Bitlang_low/blob/main/docs/language-spec.md), [exact layout](https://github.com/tomiya7688/Bitlang_low/blob/main/docs/exact-layout.md), and [runtime-helper ABI](https://github.com/tomiya7688/Bitlang_low/blob/main/docs/runtime-helper-abi.md). These requirements constrain backend lowering and explicit ABIs; they do not add Core opcodes.
 
 ## Syntax baseline
 
@@ -173,6 +191,10 @@ The existing ASSAM text form remains the starting point:
 - one canonical spelling should be emitted by generators even if the parser accepts compatible aliases.
 
 The exact grammar, operand kinds, opcode set, profile/version marker, and error rules are to be formalized before the profile is considered stable.
+
+In the Python reference implementation, the `core` validation profile excludes the VM-only `Push` / `Pop` conveniences and high-level terminal operations. The versioned JSON registry at `assam/data/instruction_registry.json` is the shared source for opcode aliases, operand roles, execution-handler identifiers, explicit register operand reads/writes, guest-addressable data-memory read/write effects, integer-parameter positions, instruction-local trap conditions, target mapping hook IDs, and control-flow categories; the parser, C translator, VM, and analyzer consume it. The v2 shape is described by `assam/data/instruction-registry-v2.schema.json`. Each Core opcode has a namespaced `target_mapping_id` for future declarative mapping tables. These IDs do not imply that mappings exist or that target coverage is complete. Guest data-memory effects are distinct from VM-internal stacks and terminal-bus effects. Integer width and signedness are explicitly marked `not_decided`; this records the unresolved requirement and does not establish execution semantics. Trap conditions record behavior observed in the current Python reference VM, not normative Draft Core behavior; host/environment failures are excluded. Its schema version does not make the Core semantics stable: the profile remains Draft until its operand semantics, ABI, and target mappings are specified and validated.
+
+JSON IR may carry an optional `profile` marker containing the selected profile name, profile version, and instruction-registry schema version. `assam json --profile core` validates and adds this marker. The JSON contract is defined by `assam/data/program-ir-v1.schema.json`, and the standalone marker schema is `assam/data/assam-core-profile-draft.schema.json`. Legacy JSON without a marker remains valid and defaults to Full. The current Core version is explicitly `draft`; this marker is for compatibility signaling, not a stability claim.
 
 ## Architecture translation acceptance criteria
 

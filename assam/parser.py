@@ -2,6 +2,10 @@
 from __future__ import annotations
 import shlex
 from .ir import Instruction, Program
+from .instruction_set import InstructionSet
+
+_instruction_set = InstructionSet()
+
 class ParseError(ValueError): pass
 def _operand(token):
     token=token.rstrip(",")
@@ -17,7 +21,9 @@ def parse(line, *, line_number=None):
         label=tokens[0][:-1]
         if not label: raise ParseError(f"line {line_number}: empty label")
         return (label,)
-    return Instruction(tokens[0], tuple(_operand(x) for x in tokens[1:]), line_number)
+    definition = _instruction_set.definition(tokens[0])
+    opcode = definition["canonical_name"] if definition is not None else tokens[0]
+    return Instruction(opcode, tuple(_operand(x) for x in tokens[1:]), line_number)
 def parse_program(source):
     instructions, labels=[], {}
     for number,line in enumerate(source.splitlines(),1):

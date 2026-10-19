@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:assam:schemas:target-mapping:v1",
+  "title": "ASSAM target mapping v1 (draft subset)",
+  "description": "Structural shape for declarative Core-to-target instruction sequences. This schema does not establish semantic equivalence or executable mappings.",
+  "type": "object",
+  "required": ["schema_version", "core_profile", "registry_schema_version", "target", "mappings"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "core_profile": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "const": "Assam Core"},
+        "version": {"type": "string", "const": "draft"}
+      },
+      "additionalProperties": false
+    },
+    "registry_schema_version": {"type": "integer", "const": 2},
+    "target": {
+      "type": "object",
+      "required": ["architecture", "profile"],
+      "properties": {
+        "architecture": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "profile": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      },
+      "additionalProperties": false
+    },
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["target_mapping_id", "sequence"],
+        "properties": {
+          "target_mapping_id": {
+            "type": "string",
+            "pattern": "^assam\\.core\\.draft\\.[a-z][a-z0-9_]*$"
+          },
+          "sequence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["opcode", "operands"],
+              "properties": {
+                "opcode": {"type": "string", "minLength": 1},
+                "operands": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "required": ["kind", "index"],
+                        "properties": {
+                          "kind": {"const": "core_operand"},
+                          "index": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Zero-based Core operand position. Registry validation additionally checks that the position exists for the mapped Core instruction."
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "required": ["kind", "value"],
+                        "properties": {
+                          "kind": {"const": "immediate"},
+                          "value": {"type": "integer"}
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "required": ["kind", "name"],
+                        "properties": {
+                          "kind": {"enum": ["target_register", "scratch", "symbol"]},
+                          "name": {"type": "string", "minLength": 1, "pattern": "\\S"}
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

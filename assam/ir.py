@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 import json
+from .profile import ProgramProfile
 
 @dataclass(frozen=True)
 class Instruction:
@@ -23,14 +24,23 @@ class Instruction:
 class Program:
     instructions: list[Instruction] = field(default_factory=list)
     labels: dict[str, int] = field(default_factory=dict)
-    def __post_init__(self): self.instructions, self.labels = list(self.instructions), dict(self.labels)
-    def to_dict(self): return {"instructions": [x.to_dict() for x in self.instructions], "labels": dict(self.labels)}
+    profile: ProgramProfile | None = None
+    def __post_init__(self):
+        self.instructions, self.labels = list(self.instructions), dict(self.labels)
+        if self.profile is not None and not isinstance(self.profile, ProgramProfile):
+            raise ValueError("profile must be a ProgramProfile")
+    def to_dict(self):
+        value = {"instructions": [x.to_dict() for x in self.instructions], "labels": dict(self.labels)}
+        if self.profile is not None:
+            value["profile"] = self.profile.to_dict()
+        return value
     def to_json(self, *, indent=2): return json.dumps(self.to_dict(), ensure_ascii=False, indent=indent)
     @classmethod
     def from_dict(cls, value):
         items=value.get("instructions", [])
         if not isinstance(items, list): raise ValueError("program instructions must be a list")
-        return cls([Instruction.from_dict(x) for x in items], value.get("labels", {}))
+        profile = ProgramProfile.from_dict(value["profile"]) if "profile" in value else None
+        return cls([Instruction.from_dict(x) for x in items], value.get("labels", {}), profile)
     @classmethod
     def from_json(cls, source):
         value=json.loads(source)

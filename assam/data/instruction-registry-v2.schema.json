@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:assam:schemas:instruction-registry:v2",
+  "title": "ASSAM instruction registry v2",
+  "description": "Machine-readable opcode contract shared by the parser, reference VM, analyzer, and target-tooling.",
+  "type": "object",
+  "required": ["schema_version", "core_profile", "instructions"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 2},
+    "core_profile": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "const": "Assam Core"},
+        "version": {"type": "string", "const": "draft"}
+      },
+      "additionalProperties": false
+    },
+    "instructions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "opcode",
+          "operands",
+          "handler",
+          "read_operands",
+          "write_operands",
+          "data_memory_effects",
+          "flow",
+          "profile"
+        ],
+        "properties": {
+          "opcode": {"type": "string", "minLength": 1},
+          "aliases": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "uniqueItems": true
+          },
+          "operands": {
+            "type": "array",
+            "items": {"enum": ["register", "value", "integer", "address", "name", "target"]}
+          },
+          "handler": {"type": "string", "minLength": 1},
+          "read_operands": {
+            "description": "Operand positions read by the instruction; register-read analysis counts only register-valued operands at these positions.",
+            "type": "array",
+            "items": {"type": "integer", "minimum": 0},
+            "uniqueItems": true
+          },
+          "write_operands": {
+            "description": "Operand positions written by the instruction.",
+            "type": "array",
+            "items": {"type": "integer", "minimum": 0},
+            "uniqueItems": true
+          },
+          "data_memory_effects": {
+            "description": "Effects on ASSAM guest-addressable data memory; VM-internal call/data stacks and terminal-bus effects are separate.",
+            "type": "object",
+            "required": ["read", "write"],
+            "properties": {
+              "read": {"type": "boolean"},
+              "write": {"type": "boolean"}
+            },
+            "additionalProperties": false
+          },
+          "integer_parameters": {
+            "description": "Required for Core instructions that consume or produce integer data. The affected operand positions are identified, while width and signedness remain explicitly undecided in this Draft profile.",
+            "type": ["object", "null"],
+            "required": ["operand_positions", "width", "signedness"],
+            "properties": {
+              "operand_positions": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 0},
+                "uniqueItems": true
+              },
+              "width": {"type": "string", "const": "not_decided"},
+              "signedness": {"type": "string", "const": "not_decided"}
+            },
+            "additionalProperties": false
+          },
+          "trap_conditions": {
+            "description": "Instruction-local exceptional conditions observed in the current Python reference VM, not yet normative Core semantics. Omission means no condition is classified; host/environment failures are outside this metadata.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "operand_positions"],
+              "properties": {
+                "kind": {"enum": ["division_by_zero", "negative_shift_count", "call_stack_underflow", "data_stack_underflow"]},
+                "operand_positions": {
+                  "type": "array",
+                  "items": {"type": "integer", "minimum": 0},
+                  "uniqueItems": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "target_mapping_id": {
+            "description": "Namespaced lookup key for a future declarative target mapping; it identifies a hook only and does not imply that a target mapping exists.",
+            "type": "string",
+            "pattern": "^assam\\.core\\.draft\\.[a-z][a-z0-9_]*$"
+          },
+          "flow": {"enum": ["next", "jump", "conditional", "call", "return", "halt"]},
+          "profile": {"enum": ["core", "full"]},
+          "operation": {"enum": ["add", "subtract", "multiply", "divide", "modulo", "and", "or", "xor", "not", "shiftleft", "shiftright"]},
+          "predicate": {"enum": ["equal", "not_equal"]}
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"profile": {"const": "core"}}, "required": ["profile"]},
+            "then": {"required": ["target_mapping_id"]},
+            "else": {"not": {"required": ["target_mapping_id"]}}
+          }
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

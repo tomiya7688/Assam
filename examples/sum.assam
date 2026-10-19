@@ -1,0 +1,6 @@
+Move r1 17
+Move r2 25
+Add r4 r1 r2
+Move r3 r4
+Move r0 r3
+Halt

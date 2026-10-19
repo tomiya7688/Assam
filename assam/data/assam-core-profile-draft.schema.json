@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:assam:schemas:assam-core-profile-draft:v2",
+  "title": "Assam Core Draft JSON IR profile marker",
+  "description": "The optional profile object emitted by the current Draft Core JSON IR writer.",
+  "type": "object",
+  "required": ["name", "version", "registry_schema_version"],
+  "properties": {
+    "name": {"type": "string", "const": "Assam Core"},
+    "version": {"type": "string", "const": "draft"},
+    "registry_schema_version": {"type": "integer", "const": 2}
+  },
+  "additionalProperties": false
+}

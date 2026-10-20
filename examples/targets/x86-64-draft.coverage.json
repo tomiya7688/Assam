@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "core_profile": {
+    "name": "Assam Core",
+    "version": "draft"
+  },
+  "registry_schema_version": 2,
+  "target": {
+    "architecture": "x86-64",
+    "profile": "x86-64-draft"
+  },
+  "coverage": [
+    {
+      "target_mapping_id": "assam.core.draft.move",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.load",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.store",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.add",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.subtract",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.multiply",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.divide",
+      "disposition": "out_of_scope",
+      "reason": "idiv needs fixed rax/rdx and a non-immediate divisor, and a zero divisor raises a hardware #DE fault rather than the Core trap; the explicit check cannot be expressed declaratively yet."
+    },
+    {
+      "target_mapping_id": "assam.core.draft.modulo",
+      "disposition": "out_of_scope",
+      "reason": "idiv needs fixed rax/rdx and a non-immediate divisor, and a zero divisor raises a hardware #DE fault rather than the Core trap; the explicit check cannot be expressed declaratively yet."
+    },
+    {
+      "target_mapping_id": "assam.core.draft.and",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.or",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.xor",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.not",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.shift_left",
+      "disposition": "out_of_scope",
+      "reason": "Variable counts must live in cl and negative counts must trap per Core; neither can be expressed declaratively yet, and width semantics are not_decided."
+    },
+    {
+      "target_mapping_id": "assam.core.draft.shift_right",
+      "disposition": "out_of_scope",
+      "reason": "Variable counts must live in cl and negative counts must trap per Core; neither can be expressed declaratively yet, and width/arithmetic-vs-logical semantics are not_decided."
+    },
+    {
+      "target_mapping_id": "assam.core.draft.compare",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump_equal",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump_not_equal",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.call",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.return",
+      "disposition": "in_scope"
+    },
+    {
+      "target_mapping_id": "assam.core.draft.halt",
+      "disposition": "in_scope"
+    }
+  ]
+}

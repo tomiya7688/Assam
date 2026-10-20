@@ -12,3 +12,12 @@ def test_riscv64_mapping_matches_its_coverage_manifest():
     )
     assert report["coverage"]["in_scope"] == 16
     assert report["coverage"]["out_of_scope"] == 5
+
+
+def test_x86_64_mapping_matches_its_coverage_manifest():
+    report = check_target_mappings(
+        TARGETS / "x86-64-draft.mapping.json",
+        coverage_path=TARGETS / "x86-64-draft.coverage.json",
+    )
+    assert report["coverage"]["in_scope"] == 17
+    assert report["coverage"]["out_of_scope"] == 4

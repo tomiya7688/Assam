@@ -1,0 +1,517 @@
+{
+  "schema_version": 1,
+  "core_profile": {
+    "name": "Assam Core",
+    "version": "draft"
+  },
+  "registry_schema_version": 2,
+  "target": {
+    "architecture": "x86-64",
+    "profile": "x86-64-draft"
+  },
+  "mappings": [
+    {
+      "target_mapping_id": "assam.core.draft.move",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.load",
+      "sequence": [
+        {
+          "opcode": "mov_r64_m64",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.store",
+      "sequence": [
+        {
+          "opcode": "mov_m64_r64",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.add",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "add",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.subtract",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "sub",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.multiply",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "imul",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.and",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "and",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.or",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "or",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.xor",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "xor",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.not",
+      "sequence": [
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        },
+        {
+          "opcode": "not",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        },
+        {
+          "opcode": "mov",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.compare",
+      "sequence": [
+        {
+          "opcode": "cmp",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "sete",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0_low8"
+            }
+          ]
+        },
+        {
+          "opcode": "movzx",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0_low8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump",
+      "sequence": [
+        {
+          "opcode": "jmp",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump_equal",
+      "sequence": [
+        {
+          "opcode": "cmp",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "je",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump_not_equal",
+      "sequence": [
+        {
+          "opcode": "cmp",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "jne",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.call",
+      "sequence": [
+        {
+          "opcode": "call",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.return",
+      "sequence": [
+        {
+          "opcode": "ret",
+          "operands": []
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.halt",
+      "sequence": [
+        {
+          "opcode": "jmp",
+          "operands": [
+            {
+              "kind": "symbol",
+              "name": "assam_halt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

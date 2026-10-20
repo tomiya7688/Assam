@@ -9,3 +9,4 @@ These pages are English translations of the Japanese canonical documents. Each p
 - [Roadmap](roadmap.md)
 - [Proposal](proposal.md)
 - [Development workflow](workflow.md)
+- [Coding rules](coding-rules.md)

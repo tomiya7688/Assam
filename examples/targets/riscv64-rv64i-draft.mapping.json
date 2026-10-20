@@ -1,0 +1,359 @@
+{
+  "schema_version": 1,
+  "core_profile": {
+    "name": "Assam Core",
+    "version": "draft"
+  },
+  "registry_schema_version": 2,
+  "target": {
+    "architecture": "riscv64",
+    "profile": "rv64i-draft"
+  },
+  "mappings": [
+    {
+      "target_mapping_id": "assam.core.draft.move",
+      "sequence": [
+        {
+          "opcode": "mv",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.load",
+      "sequence": [
+        {
+          "opcode": "ld",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.store",
+      "sequence": [
+        {
+          "opcode": "sd",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.add",
+      "sequence": [
+        {
+          "opcode": "add",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.subtract",
+      "sequence": [
+        {
+          "opcode": "sub",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.and",
+      "sequence": [
+        {
+          "opcode": "and",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.or",
+      "sequence": [
+        {
+          "opcode": "or",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.xor",
+      "sequence": [
+        {
+          "opcode": "xor",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.not",
+      "sequence": [
+        {
+          "opcode": "xori",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "immediate",
+              "value": -1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.compare",
+      "sequence": [
+        {
+          "opcode": "sub",
+          "operands": [
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            }
+          ]
+        },
+        {
+          "opcode": "sltiu",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 0
+            },
+            {
+              "kind": "scratch",
+              "name": "t0"
+            },
+            {
+              "kind": "immediate",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump",
+      "sequence": [
+        {
+          "opcode": "jal",
+          "operands": [
+            {
+              "kind": "target_register",
+              "name": "zero"
+            },
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump_equal",
+      "sequence": [
+        {
+          "opcode": "beq",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            },
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.jump_not_equal",
+      "sequence": [
+        {
+          "opcode": "bne",
+          "operands": [
+            {
+              "kind": "core_operand",
+              "index": 1
+            },
+            {
+              "kind": "core_operand",
+              "index": 2
+            },
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.call",
+      "sequence": [
+        {
+          "opcode": "jal",
+          "operands": [
+            {
+              "kind": "target_register",
+              "name": "ra"
+            },
+            {
+              "kind": "core_operand",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.return",
+      "sequence": [
+        {
+          "opcode": "jalr",
+          "operands": [
+            {
+              "kind": "target_register",
+              "name": "zero"
+            },
+            {
+              "kind": "target_register",
+              "name": "ra"
+            },
+            {
+              "kind": "immediate",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target_mapping_id": "assam.core.draft.halt",
+      "sequence": [
+        {
+          "opcode": "jal",
+          "operands": [
+            {
+              "kind": "target_register",
+              "name": "zero"
+            },
+            {
+              "kind": "symbol",
+              "name": "assam_halt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

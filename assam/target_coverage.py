@@ -103,7 +103,15 @@ def check_target_mappings(mapping_path, registry_path=None, coverage_path=None):
     mapping_table = _read_json(Path(mapping_path), "target mapping table")
     registry_path = Path(registry_path) if registry_path else _DEFAULT_REGISTRY
     registry, core_ids = _load_core_mapping_ids(registry_path)
+    report, mapping_ids = _check_mapping_table(mapping_table, registry, core_ids)
+    if coverage_path is not None:
+        manifest = _read_json(Path(coverage_path), "coverage manifest")
+        coverage_report = _check_coverage_manifest(manifest, registry, core_ids)
+        _match_mapping_coverage(report, mapping_ids, manifest, coverage_report)
+    return report
 
+
+def _check_mapping_table(mapping_table, registry, core_ids):
     _require_object_keys(
         mapping_table,
         {"schema_version", "core_profile", "registry_schema_version", "target", "mappings"},
@@ -168,32 +176,32 @@ def check_target_mappings(mapping_path, registry_path=None, coverage_path=None):
         "target_instruction_count": instruction_count,
         "core_ids_without_mapping": sorted(set(core_ids) - seen),
     }
-    if coverage_path is not None:
-        manifest = _read_json(Path(coverage_path), "coverage manifest")
-        coverage_report = _check_coverage_manifest(manifest, registry, core_ids)
-        if (
-            _canonical_architecture(target["architecture"])
-            != _canonical_architecture(coverage_report["architecture"])
-            or target["profile"] != coverage_report["profile"]
-        ):
-            raise ValueError("mapping table and coverage manifest target architecture/profile must match")
-        expected_ids = {
-            entry["target_mapping_id"]
-            for entry in manifest["coverage"]
-            if entry["disposition"] == "in_scope"
-        }
-        missing = sorted(expected_ids - seen)
-        excluded = sorted(seen - expected_ids)
-        if missing or excluded:
-            details = []
-            if missing:
-                details.append("missing in_scope mappings: " + ", ".join(missing))
-            if excluded:
-                details.append("mappings declared out_of_scope: " + ", ".join(excluded))
-            raise ValueError("; ".join(details))
-        report["validation_scope"] = "mapping_structure_registry_references_and_coverage_only"
-        report["coverage"] = coverage_report
-    return report
+    return report, seen
+
+
+def _match_mapping_coverage(report, mapping_ids, manifest, coverage_report):
+    if (
+        _canonical_architecture(report["architecture"])
+        != _canonical_architecture(coverage_report["architecture"])
+        or report["profile"] != coverage_report["profile"]
+    ):
+        raise ValueError("mapping table and coverage manifest target architecture/profile must match")
+    expected_ids = {
+        entry["target_mapping_id"]
+        for entry in manifest["coverage"]
+        if entry["disposition"] == "in_scope"
+    }
+    missing = sorted(expected_ids - mapping_ids)
+    excluded = sorted(mapping_ids - expected_ids)
+    if missing or excluded:
+        details = []
+        if missing:
+            details.append("missing in_scope mappings: " + ", ".join(missing))
+        if excluded:
+            details.append("mappings declared out_of_scope: " + ", ".join(excluded))
+        raise ValueError("; ".join(details))
+    report["validation_scope"] = "mapping_structure_registry_references_and_coverage_only"
+    report["coverage"] = coverage_report
 
 
 def _validate_target_operand(operand, mapping_id, core_operand_count):
@@ -245,31 +253,65 @@ def build_target_coverage_template(architecture, profile, registry_path=None):
     }
 
 
-def check_target_matrix(manifest_paths, registry_path=None):
-    """Check per-manifest completeness and declaration of each required architecture."""
-    reports = [check_target_coverage(path, registry_path) for path in manifest_paths]
-    if not reports:
+def check_target_matrix(manifest_paths, registry_path=None, mapping_paths=None):
+    """Check required targets and, optionally, matching mapping-table structures."""
+    manifests = [_read_json(Path(path), "coverage manifest") for path in manifest_paths]
+    if not manifests:
         raise ValueError("at least one target coverage manifest is required")
+    registry_path = Path(registry_path) if registry_path else _DEFAULT_REGISTRY
+    registry, core_ids = _load_core_mapping_ids(registry_path)
+    reports = [_check_coverage_manifest(manifest, registry, core_ids) for manifest in manifests]
 
     architectures = set()
-    profiles = set()
-    for report in reports:
+    manifests_by_target = {}
+    for manifest, report in zip(manifests, reports):
         architecture = _canonical_architecture(report["architecture"])
         profile = report["profile"]
         identity = (architecture, profile)
-        if identity in profiles:
+        if identity in manifests_by_target:
             raise ValueError(f"duplicate target coverage manifest for {architecture}/{profile}")
-        profiles.add(identity)
+        manifests_by_target[identity] = (manifest, report)
         architectures.add(architecture)
 
     missing = sorted(set(_REQUIRED_ARCHITECTURES) - architectures)
     if missing:
         raise ValueError("missing required target architecture declarations: " + ", ".join(missing))
-    return {
+    result = {
         "validation_scope": "coverage_declarations_only",
         "manifest_count": len(reports),
         "architectures": sorted(architectures),
     }
+    if mapping_paths is not None:
+        mappings_by_target = {}
+        for path in mapping_paths:
+            try:
+                table = _read_json(Path(path), "target mapping table")
+                report, mapping_ids = _check_mapping_table(table, registry, core_ids)
+            except ValueError as exc:
+                raise ValueError(f"mapping table {path}: {exc}") from exc
+            architecture = _canonical_architecture(report["architecture"])
+            profile = report["profile"]
+            identity = (architecture, profile)
+            if identity in mappings_by_target:
+                raise ValueError(f"duplicate target mapping table for {architecture}/{profile}")
+            if identity not in manifests_by_target:
+                raise ValueError(f"mapping table has no matching coverage manifest: {architecture}/{profile}")
+            manifest, coverage_report = manifests_by_target[identity]
+            try:
+                _match_mapping_coverage(report, mapping_ids, manifest, coverage_report)
+            except ValueError as exc:
+                raise ValueError(f"target {architecture}/{profile}: {exc}") from exc
+            mappings_by_target[identity] = report
+        missing = sorted(set(manifests_by_target) - set(mappings_by_target))
+        if missing:
+            raise ValueError(
+                "missing target mapping tables: "
+                + ", ".join(f"{architecture}/{profile}" for architecture, profile in missing)
+            )
+        result["validation_scope"] = "mapping_matrix_structure_registry_references_and_coverage_only"
+        result["mapping_table_count"] = len(mappings_by_target)
+        result["mappings"] = [mappings_by_target[identity] for identity in sorted(mappings_by_target)]
+    return result
 
 
 def _canonical_architecture(architecture):

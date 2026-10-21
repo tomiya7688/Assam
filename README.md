@@ -26,7 +26,7 @@ python -m assam.cli analyze examples/sum.assam --format json
 python -m assam.cli analyze core-program.assam --profile core
 ```
 
-`core` は Core 命令だけを許可する検証プロファイルです。Parser、VM、C入力変換器、静的解析器が共通の[命令レジストリ](assam/data/instruction_registry.json)を参照します。命令レジストリはschema v2で、各命令のレジスタread/write位置、ゲストデータメモリ効果、命令固有trap条件も記録します。Core命令には将来のターゲット対応表用hook IDも付けていますが、変換表自体はまだありません。整数データを扱うCore命令には幅・符号を要する位置も記録していますが、具体的な整数幅と符号の意味は未決定です。[JSON IR全体のSchema](assam/data/program-ir-v1.schema.json)とCore印の[Schema](assam/data/assam-core-profile-draft.schema.json)も同梱しています。印のない従来JSONは従来どおりFullとして扱います。仕様はまだDraftであり、x64 / ARM64 / RISC-V の変換表、呼出規約なども未確定です。現在の範囲と設計条件は [Assam Core Profile](doc/jp/assam-core.md) を参照してください。
+`core` は Core 命令だけを許可する検証プロファイルです。Parser、VM、C入力変換器、静的解析器が共通の[命令レジストリ](assam/data/instruction_registry.json)を参照します。命令レジストリはschema v2で、各命令のレジスタread/write位置、ゲストデータメモリ効果、命令固有trap条件を記録します。Core命令にはターゲット対応表用hook IDも付けています。x86-64とRV64IのDraft対応表はありますが、ARM64対応表と実際の変換・意味検証は未完成です。`check-target-matrix` は複数の `--mapping` とカバレッジ宣言の対応を構造的に検査できます。整数幅・符号と呼出規約も未決定です。[JSON IR全体のSchema](assam/data/program-ir-v1.schema.json)とCore印の[Schema](assam/data/assam-core-profile-draft.schema.json)も同梱しています。印のない従来JSONは従来どおりFullとして扱います。現在の範囲と設計条件は [Assam Core Profile](doc/jp/assam-core.md) を参照してください。
 
 `from-c` はC全体をコンパイルする機能ではありません。`int main` 内の整数変数、初期化、代入、`+ - * / %`、括弧、単項符号、最後の `return` をASSAMへ変換します。分岐、ループ、関数呼び出し、ポインタ、型変換は対象外です。戻り値はVMの `r0` に格納します。
 

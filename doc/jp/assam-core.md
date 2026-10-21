@@ -124,6 +124,8 @@ Core命令への採用審査では、次を確認します。
 
 `assam check-target-matrix <x64.json> <arm64.json> <riscv.json>` は各manifestの網羅宣言を個別に検査したうえで、必須3ターゲット（別名 `x86-64` / `AArch64` / `RISC-V`）が揃うことを確認します。カスタムターゲットmanifestも追加でき、`--format json` で結果を機械処理できます。結果の `validation_scope` は `coverage_declarations_only` であり、`in_scope` の変換実装や実行可能性は証明しません。
 
+対応表も一括照合する場合は、各対応表に対して `--mapping <mapping.json>` を繰り返し指定します。全manifestに対して同じarchitecture／profileの対応表が一つずつ必要です。ファイルの指定順は問いません。対応表の不足・重複、対応するmanifestのない表、`in_scope` の命令列不足、`out_of_scope` との矛盾を拒否します。追加の独自ターゲットや複数profileにも同じ規則を適用し、`--registry` は全ファイルに共通で使います。JSON結果の `validation_scope` は `mapping_matrix_structure_registry_references_and_coverage_only` となり、`mapping_table_count` とターゲット／profile順の `mappings` に検査結果を含めます。検査するのは命令列の構造と宣言の整合性であり、変換意味や実行結果の同等性は別途検証します。
+
 `assam scaffold-target-coverage <architecture> <profile>` はCore hook IDをすべて含むJSON雛形を標準出力へ出します。全項目は理由付き `out_of_scope` として生成されるため、各項目をレビューして明示的に分類し直す必要があります。雛形の出力やmatrix検査は対応実装を表明しません。
 
 実対応データの最小構造は [target-mapping-v1.schema.json](../../assam/data/target-mapping-v1.schema.json) でDraft定義します。Core hook IDごとに、ターゲットopcodeと、Core operand参照・即値・ターゲットレジスタ・scratch名・symbolからなる命令列を記述できます。このschemaはJSON形状だけを検査し、命令意味の同等性、レジスタ割当て、制約、分岐条件、幅／符号variant、ABI helper、Core registryとの網羅性は検証しません。したがって実行可能な変換契約ではなく、coverage manifestの `in_scope` 宣言も実装済みを意味しません。

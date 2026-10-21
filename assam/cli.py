@@ -27,6 +27,7 @@ def main(argv=None):
     mappings.add_argument("--format",choices=("text","json"),default="text",help="report format")
     matrix=sub.add_parser("check-target-matrix",help="check Core coverage declarations for x64, ARM64, and RISC-V")
     matrix.add_argument("manifests",type=Path,nargs="+"); matrix.add_argument("--registry",type=Path,help="instruction registry JSON (defaults to the bundled registry)")
+    matrix.add_argument("--mapping",type=Path,action="append",help="mapping table to match by target/profile; repeat for every manifest")
     matrix.add_argument("--format",choices=("text","json"),default="text",help="report format")
     scaffold=sub.add_parser("scaffold-target-coverage",help="print a review-required coverage manifest for one target")
     scaffold.add_argument("architecture"); scaffold.add_argument("profile"); scaffold.add_argument("--registry",type=Path,help="instruction registry JSON (defaults to the bundled registry)")
@@ -59,10 +60,12 @@ def main(argv=None):
                 coverage_note="coverage declarations matched; " if "coverage" in report else ""
                 print(f"mapping structure valid: {report['mapping_count']} hook(s), {report['target_instruction_count']} target instruction(s); {len(report['core_ids_without_mapping'])} Core hook(s) omitted; {coverage_note}semantics not checked")
         elif args.command=="check-target-matrix":
-            report=check_target_matrix(args.manifests,args.registry)
+            report=check_target_matrix(args.manifests,args.registry,mapping_paths=args.mapping)
             required=", ".join(name for name in ("x64", "arm64", "riscv") if name in report["architectures"])
             if args.format=="json": print(json.dumps(report,ensure_ascii=False,indent=2))
-            else: print(f"target coverage declarations valid: required targets {required}; {report['manifest_count']} manifest(s)")
+            else:
+                mapping_note=f"; {report['mapping_table_count']} mapping table(s) matched; semantics not checked" if "mapping_table_count" in report else ""
+                print(f"target coverage declarations valid: required targets {required}; {report['manifest_count']} manifest(s){mapping_note}")
         elif args.command=="scaffold-target-coverage":
             manifest=build_target_coverage_template(args.architecture,args.profile,args.registry)
             print(json.dumps(manifest,ensure_ascii=False,indent=2))

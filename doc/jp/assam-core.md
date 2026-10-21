@@ -122,9 +122,11 @@ Core命令への採用審査では、次を確認します。
 
 `assam check-target-coverage <manifest.json>` はmanifest v1の必須構造を検査した後、同梱Coreレジストリと照合し、全Core hook IDが一度ずつ宣言され、未知IDや重複がないことを検査します。別レジストリを検査する場合は `--registry <registry.json>`、機械処理向けJSON出力には `--format json` を指定します。結果の `validation_scope` は `coverage_declarations_only` であり、変換実装や実行可能性は検査しません。
 
-`assam check-target-matrix <x64.json> <arm64.json> <riscv.json>` は各manifestの網羅宣言を個別に検査したうえで、必須3ターゲット（別名 `x86-64` / `AArch64` / `RISC-V`）が揃うことを確認します。カスタムターゲットmanifestも追加でき、`--format json` で結果を機械処理できます。結果の `validation_scope` は `coverage_declarations_only` であり、`in_scope` の変換実装や実行可能性は証明しません。
+`assam check-target-matrix <x64.json> <arm64.json> <riscv.json>` は各manifestの網羅宣言を個別に検査したうえで、必須3ターゲット（別名 `x86-64` / `AArch64` / `RISC-V`・`riscv64`）が揃うことを確認します。カスタムターゲットmanifestも追加でき、`--format json` で結果を機械処理できます。結果の `validation_scope` は `coverage_declarations_only` であり、`in_scope` の変換実装や実行可能性は証明しません。
 
 対応表も一括照合する場合は、各対応表に対して `--mapping <mapping.json>` を繰り返し指定します。全manifestに対して同じarchitecture／profileの対応表が一つずつ必要です。ファイルの指定順は問いません。対応表の不足・重複、対応するmanifestのない表、`in_scope` の命令列不足、`out_of_scope` との矛盾を拒否します。追加の独自ターゲットや複数profileにも同じ規則を適用し、`--registry` は全ファイルに共通で使います。JSON結果の `validation_scope` は `mapping_matrix_structure_registry_references_and_coverage_only` となり、`mapping_table_count` とターゲット／profile順の `mappings` に検査結果を含めます。検査するのは命令列の構造と宣言の整合性であり、変換意味や実行結果の同等性は別途検証します。
+
+同梱Draft例は `examples/targets/` のx86-64・AArch64・RV64Iの3組です。AArch64の `a64-draft` は単純なデータ演算と分岐の命令列候補だけを `in_scope` とし、メモリ、除算、シフト、比較結果、呼出／復帰、停止は不足する意味・ABI情報を理由に `out_of_scope` とします。`in_scope` も即値のエンコード、レジスタ割当て、幅、分岐距離や実行結果を保証しません。3組の一括構造照合はCIで行いますが、変換fixtureを通した受け入れ条件は未達です。
 
 `assam scaffold-target-coverage <architecture> <profile>` はCore hook IDをすべて含むJSON雛形を標準出力へ出します。全項目は理由付き `out_of_scope` として生成されるため、各項目をレビューして明示的に分類し直す必要があります。雛形の出力やmatrix検査は対応実装を表明しません。
 

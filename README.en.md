@@ -27,7 +27,7 @@ python -m assam.cli from-c examples/sum.c -o examples/sum.assam
 python -m assam.cli analyze examples/sum.assam
 ```
 
-`core` validates the strict Assam Core profile. The parser, VM, C translator, and analyzer share the [instruction registry](assam/data/instruction_registry.json). Registry schema v2 records register effects, guest-memory effects, trap conditions, and target mapping hook IDs. Draft mapping tables exist for x86-64 and RV64I, but the ARM64 table, executable translation, and semantic validation remain unfinished. `check-target-matrix` can structurally check multiple `--mapping` tables against their coverage declarations. Integer width, signedness, and calling conventions remain undecided. Legacy JSON without a profile marker continues to mean Full.
+`core` validates the strict Assam Core profile. The parser, VM, C translator, and analyzer share the [instruction registry](assam/data/instruction_registry.json). Registry schema v2 records register effects, guest-memory effects, trap conditions, and target mapping hook IDs. Draft mapping tables exist for x86-64, ARM64, and RV64I, but none prove executable translation or semantic equivalence. `check-target-matrix` can structurally check multiple `--mapping` tables against their coverage declarations. Integer width, signedness, and calling conventions remain undecided. Legacy JSON without a profile marker continues to mean Full.
 
 `from-c` is not a full C compiler. It translates a small subset: integer locals and assignments, `+ - * / %`, parentheses, unary signs, and a final `return` inside `int main`. Branches, loops, function calls, pointers, and casts are unsupported. The return value is stored in VM register `r0`.
 

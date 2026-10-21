@@ -37,10 +37,21 @@ class Program:
     def to_json(self, *, indent=2): return json.dumps(self.to_dict(), ensure_ascii=False, indent=indent)
     @classmethod
     def from_dict(cls, value):
+        if not isinstance(value, dict): raise ValueError("program must be an object")
         items=value.get("instructions", [])
         if not isinstance(items, list): raise ValueError("program instructions must be a list")
+        instructions=[Instruction.from_dict(x) for x in items]
+        labels=value.get("labels", {})
+        if not isinstance(labels, dict): raise ValueError("labels must be an object")
+        for name, target in labels.items():
+            if not isinstance(name, str) or not name:
+                raise ValueError(f"invalid label name: {name!r}")
+            if type(target) is not int:
+                raise ValueError(f"label {name!r} target must be an integer")
+            if not 0 <= target < len(instructions):
+                raise ValueError(f"label {name!r} target out of range: {target}")
         profile = ProgramProfile.from_dict(value["profile"]) if "profile" in value else None
-        return cls([Instruction.from_dict(x) for x in items], value.get("labels", {}), profile)
+        return cls(instructions, labels, profile)
     @classmethod
     def from_json(cls, source):
         value=json.loads(source)

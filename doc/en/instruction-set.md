@@ -22,6 +22,7 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 
 - The [program-ir-v1.schema.json](../../assam/data/program-ir-v1.schema.json) describes the overall JSON IR structure. Existing JSON without a profile marker remains valid.
 - The schema checks structure. `InstructionSet` separately validates opcode and operand meaning, as well as label references.
+- On JSON IR load, `Program.from_dict` / `Program.from_json` require `labels` to be an object mapping non-empty string names to integer instruction indices in `0 <= index < instruction count` (the end position is not a target). Boolean and string indices raise `ValueError`. This is a load-boundary check; `InstructionSet` still validates branch-target operand semantics.
 - `json --profile core` validates a program as Core and adds a top-level `profile` object to the JSON IR.
 - The marker records the profile name, version, and instruction-registry schema version. The current version string `draft` is not a stability guarantee.
 - Current marker: `{"profile":{"name":"Assam Core","version":"draft","registry_schema_version":2}}`.

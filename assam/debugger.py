@@ -13,6 +13,8 @@ class Debugger:
     def state(self): return DebugState(self.vm.ip,self.vm.halted,dict(self.vm.registers),dict(self.vm.memory),tuple(self.vm.stack),tuple(self.vm.call_stack))
     def step(self): self.vm.step(); return self.state()
     def continue_execution(self, *, max_steps=100000):
+        if type(max_steps) is not int or max_steps < 0:
+            raise ValueError("max_steps must be a non-negative integer")
         steps=0
         while not self.vm.halted:
             if steps and self.vm.ip in self.breakpoints: break

@@ -78,3 +78,4 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 - Runtime errors are raised as `VMError` containing the instruction pointer and instruction.
 - Runtime errors from terminal instructions are converted to `VMError` with the relevant instruction location.
 - An omitted `trap_conditions` field means the registry does not currently classify an instruction-local trap for that instruction. Execution limits such as the step limit are environmental constraints, not instruction traps.
+- `VM.run(max_steps=N)` and `Debugger.continue_execution(max_steps=N)` count instructions executed per call. A `Halt` on instruction N succeeds; if still running after N instructions, the next instruction is not executed and `VMError` / `RuntimeError`, respectively, is raised. With `N=0`, an already halted program returns its current state. Negative, non-integer, and bool values raise `ValueError` before execution.

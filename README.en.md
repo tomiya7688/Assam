@@ -15,6 +15,8 @@ program = parse_program("Move r0 2\nAdd r1 r0 3\nHalt")
 print(VM(program).run()["r1"])
 ```
 
+`VM.run(max_steps=N)` and `Debugger.continue_execution(max_steps=N)` limit instructions executed per call. Halting on instruction N succeeds. Reaching the limit while still running raises `VMError` in the VM or `RuntimeError` in the debugger. With `N=0`, a running program executes nothing and exceeds the limit, while an already halted one returns its state. Negative or non-integer values (including bool) raise `ValueError` before execution.
+
 CLI commands, run from the repository root:
 
 ```text

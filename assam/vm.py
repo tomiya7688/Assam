@@ -94,10 +94,14 @@ class VM:
             self.ip += 1
 
     def run(self, *, max_steps=100000):
+        if type(max_steps) is not int or max_steps < 0:
+            raise ValueError("max_steps must be a non-negative integer")
         for _ in range(max_steps):
             if self.halted:
                 return dict(self.registers)
             self.step()
+        if self.halted:
+            return dict(self.registers)
         raise VMError(f"step limit exceeded: {max_steps}")
 
     def _op_move(self, definition, args):

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "core_profile": {"name": "Assam Core", "version": "draft"},
+  "registry_schema_version": 2,
+  "target": {"architecture": "AArch64", "profile": "a64-draft"},
+  "coverage": [
+    {"target_mapping_id": "assam.core.draft.move", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.load", "disposition": "out_of_scope", "reason": "Guest address lowering, load width, and memory bounds behavior are not described by mapping v1."},
+    {"target_mapping_id": "assam.core.draft.store", "disposition": "out_of_scope", "reason": "Guest address lowering, store width, and memory bounds behavior are not described by mapping v1."},
+    {"target_mapping_id": "assam.core.draft.add", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.subtract", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.multiply", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.divide", "disposition": "out_of_scope", "reason": "Core division-by-zero trap and signedness are unresolved; A64 division alone does not implement the Core trap."},
+    {"target_mapping_id": "assam.core.draft.modulo", "disposition": "out_of_scope", "reason": "Core division-by-zero trap, signedness, and remainder lowering need an explicit sequence not expressed here."},
+    {"target_mapping_id": "assam.core.draft.and", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.or", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.xor", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.not", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.shift_left", "disposition": "out_of_scope", "reason": "Negative shift counts must trap per Core, and width semantics are not decided."},
+    {"target_mapping_id": "assam.core.draft.shift_right", "disposition": "out_of_scope", "reason": "Negative shift counts must trap per Core; width and arithmetic-versus-logical semantics are not decided."},
+    {"target_mapping_id": "assam.core.draft.compare", "disposition": "out_of_scope", "reason": "Mapping v1 has no condition-code operand kind for the A64 CSET result sequence."},
+    {"target_mapping_id": "assam.core.draft.jump", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.jump_equal", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.jump_not_equal", "disposition": "in_scope"},
+    {"target_mapping_id": "assam.core.draft.call", "disposition": "out_of_scope", "reason": "Core call-stack behavior and the A64 link-register preservation ABI are not specified."},
+    {"target_mapping_id": "assam.core.draft.return", "disposition": "out_of_scope", "reason": "Core call-stack underflow trap and the A64 return/link-register ABI are not specified."},
+    {"target_mapping_id": "assam.core.draft.halt", "disposition": "out_of_scope", "reason": "The assam_halt runtime symbol and termination ABI are not specified."}
+  ]
+}

@@ -58,6 +58,19 @@ class TargetMappingMatrixTests(unittest.TestCase):
         self.assertEqual(report["validation_scope"], "mapping_matrix_structure_registry_references_and_coverage_only")
         self.assertEqual([item["coverage"]["architecture"] for item in report["mappings"]], ["arm64", "riscv", "x64"])
 
+    def test_shipped_three_target_drafts_match_registry_and_coverage(self):
+        targets = Path(__file__).resolve().parents[1] / "examples/targets"
+        names = ("x86-64-draft", "arm64-a64-draft", "riscv64-rv64i-draft")
+        manifests = [targets / f"{name}.coverage.json" for name in names]
+        mappings = [targets / f"{name}.mapping.json" for name in reversed(names)]
+        report = check_target_matrix(manifests, mapping_paths=mappings)
+        self.assertEqual(report["mapping_table_count"], 3)
+        self.assertEqual(report["architectures"], ["arm64", "riscv", "x64"])
+        arm64 = next(item for item in report["mappings"] if item["architecture"] == "arm64")
+        self.assertEqual(arm64["mapping_count"], 11)
+        self.assertEqual(arm64["coverage"]["core_total"], 21)
+        self.assertEqual(arm64["coverage"]["in_scope"], 11)
+
     def test_missing_required_architecture_is_still_rejected(self):
         with self.assertRaisesRegex(ValueError, "missing required target architecture declarations: riscv"):
             check_target_matrix(self.manifests[:2], mapping_paths=self.mappings[:2])
@@ -77,6 +90,13 @@ class TargetMappingMatrixTests(unittest.TestCase):
         duplicate_path.write_text(json.dumps(table), encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "duplicate target mapping table for x64/structural-example"):
             check_target_matrix(self.manifests, mapping_paths=self.mappings + [duplicate_path])
+
+    def test_riscv64_manifest_and_risc_v_mapping_are_same_required_target(self):
+        manifest = json.loads(self.manifests[2].read_text(encoding="utf-8"))
+        manifest["target"]["architecture"] = "riscv64"
+        self.manifests[2].write_text(json.dumps(manifest), encoding="utf-8")
+        report = check_target_matrix(self.manifests, mapping_paths=self.mappings)
+        self.assertEqual(report["architectures"], ["arm64", "riscv", "x64"])
 
     def test_unmatched_architecture_or_profile_is_rejected(self):
         original = json.loads(self.mappings[0].read_text(encoding="utf-8"))

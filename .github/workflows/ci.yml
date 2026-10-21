@@ -25,6 +25,13 @@ jobs:
       - run: python -m pytest -q
       - name: Check shipped target mappings
         run: |
-          for t in riscv64-rv64i-draft x86-64-draft; do
+          for t in riscv64-rv64i-draft x86-64-draft arm64-a64-draft; do
             python -m assam.cli check-target-mappings "examples/targets/$t.mapping.json" --coverage "examples/targets/$t.coverage.json"
           done
+          python -m assam.cli check-target-matrix \
+            examples/targets/x86-64-draft.coverage.json \
+            examples/targets/arm64-a64-draft.coverage.json \
+            examples/targets/riscv64-rv64i-draft.coverage.json \
+            --mapping examples/targets/x86-64-draft.mapping.json \
+            --mapping examples/targets/arm64-a64-draft.mapping.json \
+            --mapping examples/targets/riscv64-rv64i-draft.mapping.json

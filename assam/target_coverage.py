@@ -15,6 +15,7 @@ _ARCHITECTURE_ALIASES = {
     "aarch64": "arm64",
     "riscv": "riscv",
     "risc-v": "riscv",
+    "riscv64": "riscv",
 }
 
 

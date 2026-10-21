@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "core_profile": {"name": "Assam Core", "version": "draft"},
+  "registry_schema_version": 2,
+  "target": {"architecture": "arm64", "profile": "a64-draft"},
+  "mappings": [
+    {"target_mapping_id": "assam.core.draft.move", "sequence": [{"opcode": "mov", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}]}]},
+    {"target_mapping_id": "assam.core.draft.add", "sequence": [{"opcode": "add", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}]},
+    {"target_mapping_id": "assam.core.draft.subtract", "sequence": [{"opcode": "sub", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}]},
+    {"target_mapping_id": "assam.core.draft.multiply", "sequence": [{"opcode": "mul", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}]},
+    {"target_mapping_id": "assam.core.draft.and", "sequence": [{"opcode": "and", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}]},
+    {"target_mapping_id": "assam.core.draft.or", "sequence": [{"opcode": "orr", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}]},
+    {"target_mapping_id": "assam.core.draft.xor", "sequence": [{"opcode": "eor", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}]},
+    {"target_mapping_id": "assam.core.draft.not", "sequence": [{"opcode": "mvn", "operands": [{"kind": "core_operand", "index": 0}, {"kind": "core_operand", "index": 1}]}]},
+    {"target_mapping_id": "assam.core.draft.jump", "sequence": [{"opcode": "b", "operands": [{"kind": "core_operand", "index": 0}]}]},
+    {"target_mapping_id": "assam.core.draft.jump_equal", "sequence": [{"opcode": "cmp", "operands": [{"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}, {"opcode": "b.eq", "operands": [{"kind": "core_operand", "index": 0}]}]},
+    {"target_mapping_id": "assam.core.draft.jump_not_equal", "sequence": [{"opcode": "cmp", "operands": [{"kind": "core_operand", "index": 1}, {"kind": "core_operand", "index": 2}]}, {"opcode": "b.ne", "operands": [{"kind": "core_operand", "index": 0}]}]}
+  ]
+}

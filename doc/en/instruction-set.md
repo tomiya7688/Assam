@@ -76,6 +76,6 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 - Unknown instructions, wrong operand counts, out-of-range registers, and undefined labels are rejected when the VM is created.
 - Include the instruction position and source line in diagnostics when available.
 - Runtime errors are raised as `VMError` containing the instruction pointer and instruction.
-- Runtime errors from terminal instructions are converted to `VMError` with the relevant instruction location.
+- In Full, unknown terminals, duplicate registration, and sending without a connection are terminal operation errors. They become `VMError` with instruction index, source line when available, opcode, and reason. A rejected operation does not change terminal, connection, or message state. Unexpected internal `KeyError` is not converted as a terminal operation error.
 - An omitted `trap_conditions` field means the registry does not currently classify an instruction-local trap for that instruction. Execution limits such as the step limit are environmental constraints, not instruction traps.
 - `VM.run(max_steps=N)` and `Debugger.continue_execution(max_steps=N)` count instructions executed per call. A `Halt` on instruction N succeeds; if still running after N instructions, the next instruction is not executed and `VMError` / `RuntimeError`, respectively, is raised. With `N=0`, an already halted program returns its current state. Negative, non-integer, and bool values raise `ValueError` before execution.

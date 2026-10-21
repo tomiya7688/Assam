@@ -33,6 +33,8 @@ python -m assam.cli analyze examples/sum.assam
 
 JSON IR loading now rejects malformed label names and out-of-range or non-integer instruction indices with `ValueError` before execution. See the [instruction-set specification](doc/en/instruction-set.md).
 
+In the Full profile, invalid terminal operations (unknown terminals, duplicate registration, or sending without a connection) raise `VMError` with the instruction index, source line when available, opcode, and reason. A rejected operation leaves terminal-bus state unchanged. Unexpected internal `KeyError` exceptions are not disguised as terminal operation errors.
+
 `from-c` is not a full C compiler. It translates a small subset: integer locals and assignments, `+ - * / %`, parentheses, unary signs, and a final `return` inside `int main`. Branches, loops, function calls, pointers, and casts are unsupported. The return value is stored in VM register `r0`.
 
 ## Documentation

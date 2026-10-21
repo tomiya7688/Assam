@@ -5,6 +5,7 @@ import operator
 
 from .instruction_set import InstructionSet
 from .terminal import BasicTerminal, TerminalBus
+from .terminal_error import TerminalOperationError
 
 
 class VMError(RuntimeError):
@@ -86,7 +87,10 @@ class VM:
             next_ip = handler(definition, instruction.operands)
         except VMError as exc:
             raise VMError(f"{exc} at instruction {self.ip}: {instruction}") from exc
-        except (IndexError, KeyError, TypeError, ValueError, ZeroDivisionError) as exc:
+        except TerminalOperationError as exc:
+            line = f" (line {instruction.source_line})" if instruction.source_line is not None else ""
+            raise VMError(f"terminal error at instruction {self.ip}{line}: {instruction.opcode}: {exc}") from exc
+        except (IndexError, TypeError, ValueError, ZeroDivisionError) as exc:
             raise VMError(f"execution error at instruction {self.ip}: {instruction}: {exc}") from exc
         if next_ip is not None:
             self.ip = next_ip

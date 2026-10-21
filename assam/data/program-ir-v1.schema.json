@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:assam:schemas:program-ir:v1",
   "title": "ASSAM JSON intermediate representation v1",
-  "description": "Canonical JSON shape emitted by Program.to_json. Runtime semantic validation adds opcode, operand, and label-target checks.",
+  "description": "Canonical JSON shape emitted by Program.to_json. Program.from_dict/from_json additionally require each label target to be an integer index of an existing instruction (0 <= index < instruction count); opcode and operand semantics are validated separately.",
   "type": "object",
   "required": ["instructions", "labels"],
   "properties": {

@@ -14,6 +14,8 @@ print(VM(program).run()["r1"])
 
 `VM.run(max_steps=N)` と `Debugger.continue_execution(max_steps=N)` は1回の呼び出しで実行する命令数を制限します。ちょうどN命令目で `Halt` した場合は成功します。未停止で上限に達するとVMは `VMError`、デバッガーは `RuntimeError` を送出します。`N=0` は未停止なら実行せず上限超過、停止済みなら状態を返します。負数や整数以外（boolを含む）は実行前に `ValueError` で拒否します。
 
+現行VMの `Add`・`Subtract`・`Multiply` は右辺が即値またはレジスタ値の `0` でも実行できます。`Divide`・`Modulo` の0除算は `VMError` です。整数幅・符号のCore正式仕様は未決です。
+
 CLI:
 
 ```text

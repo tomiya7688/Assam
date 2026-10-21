@@ -40,6 +40,7 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 - Operand positions that accept registers also accept immediate values or registers. A string consisting of `r` followed by digits is interpreted as a register.
 - `Compare` writes `1` when values are equal and `0` otherwise.
 - `Divide` rounds integer division toward zero. `Modulo` is defined as `x - Divide(x, y) * y`.
+- The current VM evaluates only the selected arithmetic operation. A zero right operand is valid for `Add`, `Subtract`, and `Multiply`; it raises `VMError` for `Divide` and `Modulo`. This describes current behavior; formal Core integer width and signedness remain undecided.
 - `Load` and `Store` use sparse VM memory. `Load` returns `0` for an address that has not been written.
 - The VM validates opcodes, labels, operand counts and forms, register range, and branch targets before execution. Invalid programs are rejected with `ValueError`.
 - `trap_conditions` records instruction-local conditions observed in the current Python VM: division by zero, negative shift counts, and call-stack underflow. Full-only `Pop` records data-stack underflow. This does not establish normative Draft Core trap semantics; terminal-bus and host/environment errors are excluded.

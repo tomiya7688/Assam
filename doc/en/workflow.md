@@ -39,6 +39,7 @@ Claude Code, Codex, ChatGPT, Copilot, and humans all follow the same procedure. 
 2. Push the branch and open a PR with `.github/pull_request_template.md` filled in (`gh pr create`).
 3. Wait for CI (`.github/workflows/ci.yml`) to finish. Check it with `gh pr checks`; do not poll in a tight loop.
 4. Self-review the whole PR diff (`gh pr diff`) against [coding-rules.md](coding-rules.md): scope (one feature), tests, documentation in both languages, no unrelated or other contributors' changes, no unverified claims. Record the result in the PR's Self-review section.
+   For code changes, request a CodeRabbit review when its free quota is available; skip it when the quota is exhausted or the service is unavailable.
 5. If CI fails or the review finds problems, fix them on the branch, push, and repeat from step 3.
 6. Merge only when CI is green and the self-review found no problems: `gh pr merge --squash --delete-branch`. Otherwise leave the PR open and report why.
 7. After merging, `git switch main` and `git pull --rebase origin main`.

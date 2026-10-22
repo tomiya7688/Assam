@@ -1,0 +1,45 @@
+{
+  "format": "assam-core-branch-cases-v1",
+  "cases": [
+    {
+      "name": "equal-taken-forward",
+      "source": "JumpEqual done 1 1\nStore 90 1\ndone:\nHalt",
+      "expected_memory": {}
+    },
+    {
+      "name": "equal-fallthrough-forward",
+      "source": "JumpEqual done 1 2\nStore 90 1\ndone:\nHalt",
+      "expected_memory": {"90": 1}
+    },
+    {
+      "name": "not-equal-taken-backward",
+      "source": "Jump check\nback:\nStore 91 1\nHalt\ncheck:\nJumpNotEqual back 1 2\nHalt",
+      "expected_memory": {"91": 1}
+    },
+    {
+      "name": "not-equal-fallthrough-backward",
+      "source": "Jump check\nback:\nStore 91 1\nHalt\ncheck:\nJumpNotEqual back 1 1\nHalt",
+      "expected_memory": {}
+    },
+    {
+      "name": "equal-alias-register-taken",
+      "source": "Move r0 1\nMove r1 1\nJe done r0 r1\nStore 92 1\ndone:\nHalt",
+      "expected_memory": {}
+    },
+    {
+      "name": "equal-alias-register-fallthrough",
+      "source": "Move r0 1\nMove r1 2\nJe done r0 r1\nStore 92 1\ndone:\nHalt",
+      "expected_memory": {"92": 1}
+    },
+    {
+      "name": "not-equal-alias-register-taken",
+      "source": "Move r0 1\nMove r1 2\nJne done r0 r1\nStore 92 1\ndone:\nHalt",
+      "expected_memory": {}
+    },
+    {
+      "name": "not-equal-alias-register-fallthrough",
+      "source": "Move r0 1\nMove r1 1\nJne done r0 r1\nStore 92 1\ndone:\nHalt",
+      "expected_memory": {"92": 1}
+    }
+  ]
+}

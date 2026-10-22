@@ -1,23 +1,18 @@
-# AGENTS.md — rules for all contributors and AI agents
+# AGENTS.md — shared entry point
 
-This file is the single entry point for Claude Code, Codex, ChatGPT, Copilot, and humans. `CLAUDE.md` and `.github/copilot-instructions.md` point here.
+Applies to Claude Code, Codex, ChatGPT, Copilot, and human contributors. `CLAUDE.md` and `.github/copilot-instructions.md` point here; keep the detailed rules in their linked sources, not in copies of this file.
 
-## Must-follow
+## Required for each work unit
 
-1. **Coding rules are mandatory**: read and follow [doc/en/coding-rules.md](doc/en/coding-rules.md) (canonical: [日本語](doc/jp/コーディングルール.md)).
-2. **Always pull first**, every session and before every unit of work:
-   `git fetch origin` then `git pull --rebase origin <current-branch>`. If this fails, do not start implementing. If the working tree has unrelated uncommitted changes you did not make, leave them untouched and do not stage them.
-3. **Never commit directly to `main`.** Work on a branch (`feat/…`, `fix/…`, `docs/…`, `chore/…`), one feature per branch.
-4. **At the end of every unit of work, open a PR** with the PR template filled in.
-5. **Wait for CI**, then **self-review the full PR diff** against the coding rules. Fix problems and re-run CI.
-6. **Merge only if** CI is green and the self-review finds no problems; otherwise fix or report. Squash-merge and delete the branch.
+1. Check `git status`, then run `git fetch origin` and `git pull --rebase origin <current-branch>` before editing. If synchronization fails, stop. Preserve unrelated uncommitted work.
+2. Follow the [coding rules](doc/jp/コーディングルール.md) ([English](doc/en/coding-rules.md)). Use one `feat/`, `fix/`, `docs/`, or `chore/` branch per feature; never commit to `main`.
+3. Follow the [one-unit workflow](doc/jp/ワークフロー/ワークフロー.md) ([English](doc/en/workflow.md)): fill the PR template, wait for CI, self-review the full PR diff, then squash-merge and delete the branch only when both are clean. Report unverified work honestly.
 
-The detailed procedure is [doc/en/workflow.md](doc/en/workflow.md) (canonical: [日本語](doc/jp/ワークフロー/ワークフロー.md)).
+## Read only what this task needs
 
-## Project quick facts
+- Set the goal and acceptance check. Search paths or symbols first (`rg --files`, `rg -n`), then read the relevant source, tests, and canonical specification sections. Stop widening the search once the scope and verification are clear.
+- For an unfamiliar area, select only the matching row in the [task-to-source map](doc/jp/作業別コンテキスト案内.md) ([English](doc/en/task-context-map.md)); it is a starting point, not a substitute for current code.
+- For Core target coverage or mapping work, open the focused [target-mappings skill](.agents/skills/assam-target-mappings/SKILL.md) only for that task. Its path is explicit so agents need not rely on product-specific skill discovery.
+- Normally skip unrelated docs, old logs, caches, and generated files; read them when the task or verification actually depends on them. Do not treat a search hit or a structural checker as proof of runtime semantics.
 
-- Python ≥ 3.10, standard library only; tests with `python -m pytest -q`.
-- CLI: `python -m assam.cli --help`.
-- Roadmap: [doc/en/roadmap.md](doc/en/roadmap.md). Pick work from there, one feature at a time.
-- Japanese docs are canonical; keep the English pages in sync.
-- Do not report unverified work as complete.
+Python ≥ 3.10, standard library only; tests: `python -m pytest -q`. Japanese docs are canonical; update corresponding English pages in the same change. Choose the next bounded unit from the [roadmap](doc/jp/開発予定.md) or a current Issue.

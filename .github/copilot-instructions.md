@@ -1,1 +1,1 @@
-Follow the rules in [AGENTS.md](../AGENTS.md) at the repository root: always pull first, work on a branch, follow doc/en/coding-rules.md, open a PR at the end, and merge only after green CI and a clean self-review.
+Follow the shared [AGENTS.md](../AGENTS.md) at the repository root. Use its task-specific links; do not duplicate the rules here.

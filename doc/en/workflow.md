@@ -22,9 +22,7 @@ If conflicts occur, resolve them before rerunning validation. If remote synchron
 - Review the existing API and tests before implementation.
 - Add tests for the feature being changed.
 - Run relevant tests and, as needed, validate the CLI, VM, JSON, and terminal communication.
-- When adding or changing target coverage manifests, run `assam check-target-coverage <manifest.json>` on each file and `assam check-target-matrix <x64.json> <arm64.json> <riscv.json>` for the required targets. If starting from `assam scaffold-target-coverage <architecture> <profile>`, review and reclassify every `out_of_scope` entry. These commands check declarations only; they do not validate implemented or executable instruction translations.
-- When adding or changing target mapping tables, run `assam check-target-mappings <mapping.json> --coverage <manifest.json>` against the coverage declarations for the same target/profile. Resolve missing `in_scope` sequences and conflicts with `out_of_scope` declarations, and verify semantic and execution equivalence separately.
-- Once mapping tables exist for the required targets, add `--mapping <mapping.json>` for each table to `assam check-target-matrix <x64.json> <arm64.json> <riscv.json>` to check the batch. Supply matching tables for any additional custom-target or profile manifests too.
+- Only for target coverage/mapping work, run the task-specific checks in the [target-mappings skill](../../.agents/skills/assam-target-mappings/SKILL.md). Keep structural checks separate from execution and semantic verification.
 - Do not report unverified items as complete.
 
 ## 3. Record and finish

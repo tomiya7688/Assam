@@ -9,4 +9,5 @@ These pages are English translations of the Japanese canonical documents. Each p
 - [Roadmap](roadmap.md)
 - [Proposal](proposal.md)
 - [Development workflow](workflow.md)
+- [Task-to-source map](task-context-map.md) (starting points for agents and people)
 - [Coding rules](coding-rules.md)

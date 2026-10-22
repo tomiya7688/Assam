@@ -72,6 +72,8 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 
 `mov`, `j`, `je`, `jne`, `ret`, `stop`, `shl`, and `shr` are aliases.
 
+A conditional branch jumps to its label when the predicate is true and advances to the next instruction when false. A `Store` on the unselected path is not executed. The [shared branch cases](../../examples/conformance/conditional-branches.json) record both paths for canonical names and aliases, immediate and register operands, forward and backward labels, and expected memory state. They are currently verified against the Python Core VM; comparison against the Go VM and target translation remains unverified.
+
 ## Error rules
 
 - Unknown instructions, wrong operand counts, out-of-range registers, and undefined labels are rejected when the VM is created.

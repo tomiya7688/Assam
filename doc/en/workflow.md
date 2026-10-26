@@ -21,6 +21,7 @@ If conflicts occur, resolve them before rerunning validation. If remote synchron
 
 - Review the existing API and tests before implementation.
 - Add tests for the feature being changed.
+- From the repository root, install development tools with `python -m pip install -e ".[dev]"`. Format only changed Python files with `python -m ruff format <files...>` and check them with `python -m ruff format --check <files...>` (Ruff 0.15.22). Do not bulk-format legacy files or another contributor's uncommitted changes. CI checks only Python files changed by the PR or push.
 - Run relevant tests and, as needed, validate the CLI, VM, JSON, and terminal communication.
 - Only for target coverage/mapping work, run the task-specific checks in the [target-mappings skill](../../.agents/skills/assam-target-mappings/SKILL.md). Keep structural checks separate from execution and semantic verification.
 - Do not report unverified items as complete.

@@ -50,7 +50,15 @@ jobs:
           if ((${#files[@]})); then
             python -m ruff format --check -- "${files[@]}"
           fi
+      - name: Compile and import every module
+        run: |
+          python -m compileall -q assam tests tools
+          python -c "import importlib, pkgutil, assam; [importlib.import_module(m.name) for m in pkgutil.walk_packages(assam.__path__, 'assam.')]"
       - run: python -m pytest -q
+      - name: Build and smoke-test the package
+        run: |
+          python -m pip install build
+          python tools/package_smoke.py "${RUNNER_TEMP}/package-smoke"
       - name: Check shipped target mappings
         run: |
           for t in riscv64-rv64i-draft x86-64-draft arm64-a64-draft; do

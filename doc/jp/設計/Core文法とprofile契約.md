@@ -21,12 +21,12 @@ JSON IR ---(loader)------------/
 
 現行はoperandが「文字列/整数」で、`"r1"`が文字列かレジスタか区別できない。これを次の4種に分ける。
 
-| kind        | 例（text）          | IR表現                            | 備考                                              |
-| ----------- | ------------------- | --------------------------------- | ------------------------------------------------- |
-| `register`  | `r5`                | `{"kind":"register","index":5}`   | Coreは`r0`〜`r31`。Fullは`r0`〜`r15`を維持        |
-| `immediate` | `42`, `0x2A`, `-1`  | `{"kind":"immediate","value":42}` | 10進/`0x`。符号付き。範囲は命令ごと（意味論参照） |
-| `symbol`    | `loop`（label参照） | `{"kind":"symbol","name":"loop"}` | label / 変換先ABI helper名                        |
-| `string`    | `"a;b"`             | `{"kind":"string","value":"a;b"}` | **Fullのみ**。Coreでは拒否                        |
+| kind        | 例（text）          | IR表現                            | 備考                                                  |
+| ----------- | ------------------- | --------------------------------- | ----------------------------------------------------- |
+| `register`  | `r5`                | `{"kind":"register","index":5}`   | Coreは`r0`〜`r31`。Fullも`r0`〜`r31`へ広げる（WP-B1） |
+| `immediate` | `42`, `0x2A`, `-1`  | `{"kind":"immediate","value":42}` | 10進/`0x`。符号付き。範囲は命令ごと（意味論参照）     |
+| `symbol`    | `loop`（label参照） | `{"kind":"symbol","name":"loop"}` | label / 変換先ABI helper名                            |
+| `string`    | `"a;b"`             | `{"kind":"string","value":"a;b"}` | **Fullのみ**。Coreでは拒否                            |
 
 ### 2.1 IR schema v2
 

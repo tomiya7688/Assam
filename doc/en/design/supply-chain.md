@@ -24,6 +24,9 @@ Items "not applicable at present" are treated in the completion criteria as "con
 - Write user-facing verification steps in the README and Release notes:
   ```text
   gh attestation verify assam-X.Y.Z-py3-none-any.whl --repo tomiya7688/Assam
+  gh attestation verify assam-X.Y.Z.tar.gz --repo tomiya7688/Assam
+  gh attestation verify assam-conformance-X.Y.Z.tar.gz --repo tomiya7688/Assam
+  gh attestation verify SHA256SUMS --repo tomiya7688/Assam
   sha256sum -c SHA256SUMS
   ```
 - When publishing to PyPI etc., use Trusted Publisher (OIDC) and PEP 740 attestation (a separate WP when the decision to publish is made).

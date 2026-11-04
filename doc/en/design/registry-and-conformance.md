@@ -113,7 +113,7 @@ Place one case per JSON file under `examples/conformance/`. Multiple VMs and tra
 1. Normal values, boundary values, and `r0` for all instructions
 2. All traps and "no side effects on trap"
 3. Conditional branches: both paths, official names/aliases (Full only), immediate/register, forward/backward labels, no side effects on the non-selected path (#8)
-4. Memory widths, sign extension, unaligned access, out of range, wraparound
+4. Memory widths, sign extension, unaligned access, out of range, wraparound (a 1-byte load with `rbase = 2^64-1`, `off = 1` succeeds with `ea = 0`; wraparound of `ea + w` traps)
 5. Nested calls and returns via `jal`/`jr`
 6. Parsing (canonical round-trip, diagnostic codes)
 7. Full compatibility (#10 string operand round-trip, aliases)

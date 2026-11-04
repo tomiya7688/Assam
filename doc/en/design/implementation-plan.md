@@ -121,7 +121,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 ### B6 C frontend, analyzer, Draft removal (#1, #3)
 
 - Prerequisite decision: Q4.
-- Deliverables: v1 canonical output from `c_frontend.py` (`return` -> `halt`, variables -> `const`/`mov`), v1 support in `analyzer.py`, removal of Draft Core (`draft`), v1-ification of `doc/*/assam-core.md` and `instruction-set.md`, roadmap update.
+- Deliverables: v1 canonical output from `c_frontend.py` (the return value of `main` is placed in `r1` and then `halt`; `r0` cannot be used because it is the constant 0 in v1. This convention belongs to the C frontend specification, not the Core semantics. Variables -> `const`/`mov`), v1 support in `analyzer.py`, removal of Draft Core (`draft`), v1-ification of `doc/*/assam-core.md` and `instruction-set.md`, roadmap update.
 - Acceptance: `examples/sum.c` is converted to v1 and returns 42 on the Python v1 VM. IR stamped Draft is rejected with a diagnostic and a migration notice.
 
 ### C1 Mapping table schema v2, loader, expander (#4)

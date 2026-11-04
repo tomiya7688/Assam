@@ -23,7 +23,7 @@ Currently operands are "string/integer", so `"r1"` cannot be distinguished as st
 
 | kind        | Example (text)           | IR representation                 | Notes                                                          |
 | ----------- | ------------------------ | --------------------------------- | -------------------------------------------------------------- |
-| `register`  | `r5`                     | `{"kind":"register","index":5}`   | Core: `r0`-`r31`. Full keeps `r0`-`r15`                        |
+| `register`  | `r5`                     | `{"kind":"register","index":5}`   | Core: `r0`-`r31`. Full is also widened to `r0`-`r31` (WP-B1)   |
 | `immediate` | `42`, `0x2A`, `-1`       | `{"kind":"immediate","value":42}` | Decimal/`0x`. Signed. Range is per instruction (see semantics) |
 | `symbol`    | `loop` (label reference) | `{"kind":"symbol","name":"loop"}` | label / translation-target ABI helper name                     |
 | `string`    | `"a;b"`                  | `{"kind":"string","value":"a;b"}` | **Full only**. Rejected in Core                                |

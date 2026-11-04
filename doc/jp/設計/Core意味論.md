@@ -21,6 +21,15 @@
 
 実行1ステップ: 命令を実行→（trapしなければ）PC更新。**trapした命令は副作用を残さない**（レジスタ・メモリ・PCを更新しない。ただし観測結果にtrapしたPCを含める）。
 
+### 1.1 検査順序・原子性・補足規則（レビュー反映）
+
+- **検査してからcommit**: 各命令は「trap判定→副作用のcommit」の順に動く。`st*`は範囲全体`[ea, ea+w)`を先に検査し、一部だけ書いてtrapしない。有効アドレス`ea`は`rbase + sext(off)`をmodulo 2^64で求めた値で、この加算の折返し自体はtrapしない（例: `rbase = 2^64-1`、`off = 1`なら`ea = 0`）。その後`ea + w`の加算折返しを検出してから範囲を比較する（`ea > memory_bytes - w`、`w > memory_bytes`は範囲外）。`jr`は対象検査後にPCを更新する。`jal`/分岐の対象labelはload時に検証済みのため、実行時にtrapしない。
+- **`jal`のリンク値**: 最終命令の`jal`が書く値は`命令数`で、有効な命令indexではない。`jr`でその値へ戻ると`invalid_jump_target` trap（末尾越えと同じ扱い）。関数ポインタとして使える値は`[0, 命令数)`のindexだけで、indexからネイティブアドレスへの対応は変換器のindex→address表（[ターゲット変換](ターゲット変換.md)）が担う。
+- **`hcall`**: 未登録idは副作用なしで`unknown_helper` trap。登録helperが失敗し得る場合のtrap種別と状態は、helper ABI表（Bitlang Low側）で定義する（v1にAssam標準helperはない）。helperは結果レジスタ`r1`〜`r2`以外のレジスタを変更しない。メモリへの副作用はhelper ABI表が許す範囲に限る。
+- **即値の範囲**: `const`は`[-2^63, 2^64-1]`（64bitの全値を表せる。`0x`は最大16桁、`-0x..`可）、`off`は`[-2^31, 2^31-1]`、`trap`/`hcall`は`[0, 2^32-1]`。範囲外はload時に`core.syntax.immediate_range`で拒否。
+- **`memory.segments`**: 各segmentは`offset + 長さ <= memory_bytes`で、相互に重ならない。違反は実行前に`core.load.segment_out_of_range` / `core.load.segment_overlap`で拒否する（実行時trapにしない）。
+- **スタックと呼出規約はCoreの外**: Coreは専用のstack領域・SP・caller/callee保存規約を定めない（r1〜r31は汎用）。Bitlang backendが`memory_bytes`内に領域を確保し、入口で`const`によりSPを初期化する。conformanceはこの規約に依存しない形のcorpusだけを置く。
+
 ## 2. 命令一覧
 
 表記: `rd`=書き込みレジスタ、`rs`=読み込みレジスタ、`imm`=即値、`L`=label。値の記号は`u`=符号なし64bit、`s`=符号付き64bit。
@@ -34,18 +43,18 @@
 
 ### 2.2 算術・ビット
 
-| 命令              | 形                   | 意味                                                                                                        |
-| ----------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `add` `sub` `mul` | `op rd, rs1, rs2`    | modulo 2^64                                                                                                 |
-| `mulhu`           | `mulhu rd, rs1, rs2` | 符号なし128bit積の上位64bit（**Q1: 含める推奨**）                                                           |
-| `mulhs`           | `mulhs rd, rs1, rs2` | 符号付き128bit積の上位64bit（**Q1**）                                                                       |
-| `divu` `remu`     | `op rd, rs1, rs2`    | 符号なし商/剰余。`rs2==0`は`div_by_zero` trap                                                               |
-| `divs` `rems`     | `op rd, rs1, rs2`    | 符号付き（0方向丸め）。`rs2==0`は`div_by_zero` trap。`MIN / -1 = MIN`、`MIN % -1 = 0`（trapしない。PRO-03） |
-| `and` `or` `xor`  | `op rd, rs1, rs2`    | ビット演算                                                                                                  |
-| `not`             | `not rd, rs`         | ビット反転                                                                                                  |
-| `shl`             | `shl rd, rs1, rs2`   | 論理左。シフト量は`rs2 & 63`                                                                                |
-| `shr`             | `shr rd, rs1, rs2`   | 論理右。シフト量は`rs2 & 63`                                                                                |
-| `sar`             | `sar rd, rs1, rs2`   | 算術右。シフト量は`rs2 & 63`                                                                                |
+| 命令              | 形                   | 意味                                                                                                                                                                |
+| ----------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `add` `sub` `mul` | `op rd, rs1, rs2`    | modulo 2^64                                                                                                                                                         |
+| `mulhu`           | `mulhu rd, rs1, rs2` | 符号なし128bit積の上位64bit（**Q1: 含める推奨**）                                                                                                                   |
+| `mulhs`           | `mulhs rd, rs1, rs2` | 符号付き128bit積の上位64bit（**Q1**）                                                                                                                               |
+| `divu` `remu`     | `op rd, rs1, rs2`    | 符号なし商/剰余。`rs2==0`は`div_by_zero` trap                                                                                                                       |
+| `divs` `rems`     | `op rd, rs1, rs2`    | 符号付き（商は0方向丸め、`rems = a - divs(a,b)*b`で剰余の符号は被除数と同じ）。`rs2==0`は`div_by_zero` trap。`MIN / -1 = MIN`、`MIN % -1 = 0`（trapしない。PRO-03） |
+| `and` `or` `xor`  | `op rd, rs1, rs2`    | ビット演算                                                                                                                                                          |
+| `not`             | `not rd, rs`         | ビット反転                                                                                                                                                          |
+| `shl`             | `shl rd, rs1, rs2`   | 論理左。シフト量は`rs2 & 63`                                                                                                                                        |
+| `shr`             | `shr rd, rs1, rs2`   | 論理右。シフト量は`rs2 & 63`                                                                                                                                        |
+| `sar`             | `sar rd, rs1, rs2`   | 算術右。シフト量は`rs2 & 63`                                                                                                                                        |
 
 ### 2.3 比較
 
@@ -68,18 +77,18 @@
 
 ### 2.5 制御
 
-| 命令          | 形               | 意味                                                           |
-| ------------- | ---------------- | -------------------------------------------------------------- |
-| `jump`        | `jump L`         | `PC = L`                                                       |
-| `beq` `bne`   | `op rs1, rs2, L` | 等値/不等値なら`PC = L`、偽なら`PC+1`                          |
-| `blt` `bge`   | `op rs1, rs2, L` | 符号付き `<` / `>=`                                            |
-| `bltu` `bgeu` | `op rs1, rs2, L` | 符号なし `<` / `>=`                                            |
-| `brz` `brnz`  | `op rs, L`       | `rs==0` / `rs!=0` なら`PC = L`                                 |
-| `jal`         | `jal rd, L`      | `rd = PC+1`（次命令のindex）; `PC = L`。`rd=r0`なら通常のjump  |
-| `jr`          | `jr rs`          | `PC = rs`。`rs`が`[0, 命令数)`外なら`invalid_jump_target` trap |
-| `halt`        | `halt`           | 正常停止                                                       |
-| `trap`        | `trap imm`       | `explicit` trap。`imm`は`[0, 2^32-1]`                          |
-| `hcall`       | `hcall imm`      | runtime helper呼出し（ABI primitive）。§5                      |
+| 命令          | 形               | 意味                                                                                                                                                              |
+| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `jump`        | `jump L`         | `PC = L`                                                                                                                                                          |
+| `beq` `bne`   | `op rs1, rs2, L` | 等値/不等値なら`PC = L`、偽なら`PC+1`                                                                                                                             |
+| `blt` `bge`   | `op rs1, rs2, L` | 符号付き `<` / `>=`                                                                                                                                               |
+| `bltu` `bgeu` | `op rs1, rs2, L` | 符号なし `<` / `>=`                                                                                                                                               |
+| `brz` `brnz`  | `op rs, L`       | `rs==0` / `rs!=0` なら`PC = L`                                                                                                                                    |
+| `jal`         | `jal rd, L`      | `rd = PC+1`（次命令のindex）; `PC = L`。`rd=r0`なら通常のjump。最終命令の`jal`が書く`命令数`は有効なindexではなく、`jr`で戻ると`invalid_jump_target` trap（§1.1） |
+| `jr`          | `jr rs`          | `PC = rs`。`rs`が`[0, 命令数)`外なら`invalid_jump_target` trap                                                                                                    |
+| `halt`        | `halt`           | 正常停止                                                                                                                                                          |
+| `trap`        | `trap imm`       | `explicit` trap。`imm`は`[0, 2^32-1]`                                                                                                                             |
+| `hcall`       | `hcall imm`      | runtime helper呼出し（ABI primitive）。§5                                                                                                                         |
 
 関数呼出しは`jal r31, f`、復帰は`jr r31`（r31は慣例であり意味論上特別ではない）。呼出規約（引数・戻り値・callee保存）はBitlang Low backend側のABIであり、Coreは規定しない。
 
@@ -108,8 +117,10 @@
 Coreは次を**命令として追加せず**、loweringで満たす（DEC-09）。
 
 - **checked overflow**: 符号付き加算`c = a + b`のoverflowは、`xor`/`and`/`slt`で`((a ^ c) & (b ^ c)) < 0`を判定し、真なら`trap`へ分岐する。乗算overflowは`mulhs`（Q1）で上位64bitを符号拡張と比較する。
+  例（`c`は加算結果）: `add c, a, b` / `xor t1, a, c` / `xor t2, b, c` / `and t1, t1, t2` / `slt t1, t1, r0` / `brnz t1, overflow`。
 - **任意の意味幅**（8/16/32bit等）: 64bit演算後に`shl`+`sar`/`shr`で符号/ゼロ拡張して幅を保つ。
-- **64bit超**（x*を含む）: backendがlimb列（64bit word）へlowerし、carry/borrowは`sltu`で得る。例: 128bit加算`(hi,lo)=(ah,al)+(bh,bl)`は`add lo`・`sltu c, lo, al`・`add hi`・`add hi, hi, c`。`Int<Radix>x*`/`Uint<Radix>x*`は固定幅や切り詰めで代用せず、動的limbまたはruntime helper（`hcall`）で扱う。数値型の`x0`は無効で`x*`の別名ではない。`Float<Radix>x\*`は拒否し、host floatで代用しない（Q5）。
+- **64bit超**（x*を含む）: backendがlimb列（64bit word）へlowerし、carry/borrowは`sltu`で得る。例: 128bit加算`(hi,lo)=(ah,al)+(bh,bl)`は`add lo`・`sltu c, lo, al`・`add hi`・`add hi, hi, c`。
+  3limb以上では、各limbの`a+b`のcarryと`+c_in`のcarryを`sltu`で別々に求め、`or`で合成して次のlimbへ渡す。`Int<Radix>x*`/`Uint<Radix>x*`は固定幅や切り詰めで代用せず、動的limbまたはruntime helper（`hcall`）で扱う。数値型の`x0`は無効で`x*`の別名ではない。`Float<Radix>x\*`は拒否し、host floatで代用しない（Q5）。
 - **zero-payload**: 論理要素数と物理サイズを区別する。stride 0でもアドレス算術を論理indexの代わりにせず、bounds検査は比較+分岐+`trap`で明示する。identity/Ref/borrow/lifetimeが観測可能ならdescriptorをbackendが明示的に保持する。Coreは配列/参照の概念を持たない。
 - **bounds/check/trap列**: `sltu`+`brz`/`brnz`+`trap`の組合せ。
 - **shift量検証**: 下位6bitを使う契約（DEC-04）。範囲外シフトをtrapさせたい意味はbackendが`sltu`+`trap`で明示する。

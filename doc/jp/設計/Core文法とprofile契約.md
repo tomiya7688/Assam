@@ -116,7 +116,8 @@ done:
 
 - profile名は`full`・`core`、版は`core`のみ`1`（将来`2`以降）。`full`は版を持たない（現行互換）。
 - IR印: `{"name":"Assam Core","version":"1","registry_schema_version":3}`。Draftの`"draft"`は読み込み時に**拒否**し、移行手順を診断で案内する（Q4の確定後）。
-- 互換: 有効なCore v`N`プログラムは、対応するFull版でも有効（DEC-11の逆は非必須）。ただしCoreのcanonical textはFullのtext parserでもそのまま受理できる（Full parserはカンマ区切り・小文字opcodeも受理する）ようにする。これを**Core→Full上位互換テスト**で保証する。
+- 互換（**構文上**）: 有効なCore v`N`プログラムのcanonical textは、Fullのtext parserでもそのまま受理できる（DEC-11の逆は非必須）。そのためFullのレジストリにもCore v`N`の全命令を`availability`で含め（`const`/`trap`/`hcall`等を追加）、Fullのレジスタ範囲を`r0`〜`r31`へ広げる（WP-B1/B3）。これを**Core→Full上位互換テスト**で保証する。
+- **意味は互換を主張しない**: Fullは無限精度整数・疎memory等の現行意味を維持するため、同名命令の実行結果がCoreと異なりうる（例: `shl`、`add`の桁あふれ）。意味が異なる同名命令は、registry上でprofile別のエントリ（別`id`）に分ける。実行結果の比較はprofileごとのconformanceで行い、FullでCore programを走らせて同一結果になることは保証しない。
 - Fullにだけ存在できるもの: PascalCase/alias、空白区切り、引用文字列、`Push`/`Pop`、端末命令、疑似命令。疑似命令はCoreへ決定的に低下できる場合のみ許し、変換後にCore検証を通す。
 - GoのVMは独自文法を持たず、同一版のparser/registryを利用する（共通テスト入力はconformance corpus）。
 

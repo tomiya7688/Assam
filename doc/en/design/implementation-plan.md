@@ -86,7 +86,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 
 - Design: [Core grammar and profile contract §2](core-grammar-and-profile.md)
 - Deliverables: `Operand` type in `assam/ir.py`, quote/comment detection fix in `assam/parser.py`, `program-ir-v2.schema.json`, v1 IR load normalization, `vm.py` branching on `kind`.
-- Acceptance: the acceptance criteria of #10 (4 items). All existing Full tests pass. Ambiguous v1 IR is rejected.
+- Acceptance: the acceptance criteria of #10 (4 items). All existing Full tests pass. Ambiguous v1 IR is rejected. The Full register range is widened to `r0`-`r31` (for Core -> Full syntactic compatibility).
 - Tests: `tests/test_operand_kinds.py` (empty string, number-like, register-like, `;`/`#`, escapes, round trip).
 - Note: minimally fix the C frontend and analyzer to handle typed operands (behavior unchanged).
 

@@ -132,11 +132,11 @@ PRとmainへのpushで次を必須にする。現状（pytest、変更Pythonフ�
 | テスト              | `pytest`（Python 3.10/3.12）                                                         | 済                                         |
 | 整形                | 変更Pythonファイルの`ruff format --check`                                            | 済                                         |
 | 文書整形            | Markdown/YAMLの`prettier --check`（変更ファイル）                                    | 運用中のworkflowに記載。未導入ならA2で導入 |
-| 構文/importチェック | `python -m compileall -q assam tests` と全モジュールimport                           | A2                                         |
-| パッケージsmoke     | wheel/sdistをbuildして別venvへインストールし`assam --help`と同梱データの存在を確認   | A2                                         |
-| CLI smoke           | `parse`/`json`/`run`/`analyze`/`from-c`の最小ケース                                  | A2                                         |
-| malformed corpus    | 不正入力が`ValueError`/診断で拒否され、生の`TypeError`/`KeyError`が漏れない          | A2（#11・#12の再発防止）                   |
-| 決定的再生          | 同じ入力を2回実行して観測結果が一致                                                  | A2                                         |
+| 構文/importチェック | `python -m compileall -q assam tests tools` と全モジュールimport                     | 済（WP-A2）                                |
+| パッケージsmoke     | wheel/sdistをbuildして別venvへインストールし`assam --help`と同梱データの存在を確認   | 済（WP-A2）                                |
+| CLI smoke           | `parse`/`json`/`run`/`analyze`/`from-c`の最小ケース                                  | 済（WP-A2）                                |
+| malformed corpus    | 不正入力が`ValueError`/診断で拒否され、生の`TypeError`/`KeyError`が漏れない          | 済（WP-A2）（#11・#12の再発防止）          |
+| 決定的再生          | 同じ入力を2回実行して観測結果が一致                                                  | 済（WP-A2）                                |
 | schema検証          | registry・IR・対応表・manifestのschema                                               | B3                                         |
 | conformance         | corpus全件（参照実装）。registry変更時は必須                                         | B5                                         |
 | 対応表網羅          | 3ターゲットの網羅宣言・対応表照合（現行）。v1命令で再構成                            | C3                                         |

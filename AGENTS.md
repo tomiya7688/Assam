@@ -16,6 +16,12 @@ Implementation follows the design documents ([日本語・正本](doc/jp/設計/
 2. Read only that WP's row and the linked design section, plus the [decision log](doc/jp/設計/決定ログ.md) ([English](doc/en/design/decision-log.md)) if a choice is unclear.
 3. If the design is missing or contradicts the code or an Issue, stop and fix the design in a separate `docs/` PR first. Do not decide silently in code.
 
+## Fix broken tooling; do not burn usage
+
+- A broken hook, script, CI step, path, plugin, or review tool is fixed on the spot, not reported and left waiting for a decision. Investigate the cause and repair it (or report once with cause and fix only if it is outside your authority: another repository, billing, secrets). This applies to the whole environment, not just one hook.
+- Automated notifications that are empty or identical to an earlier one get at most one short line, never a repeated boilerplate reply. On the second occurrence, switch to diagnosing and fixing the cause.
+- Save usage without lowering quality or scope: read and print only what the task needs, batch independent checks, and do not re-run or re-read what is already established.
+
 ## Read only what this task needs
 
 - Set the goal and acceptance check. Search paths or symbols first (`rg --files`, `rg -n`), then read the relevant source, tests, and canonical specification sections. Stop widening the search once the scope and verification are clear.

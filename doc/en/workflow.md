@@ -6,7 +6,9 @@ This document defines the steps for one unit of work.
 
 ## 1. Start
 
-- Review `doc/en/roadmap.md` and the related specification; limit the task to one feature.
+- Pick one work package (WP) from the [implementation plan](design/implementation-plan.md) in the [design documents](design/README.md). Confirm its prerequisites are on `main` and any blocking open question is settled in the [decision log](design/decision-log.md); otherwise do not start, and settle those first.
+- Read only the WP's "design reference" sections and limit the task to one feature. If the design is missing or contradicts something, do not decide in code: fix the design first on a `docs/` branch.
+- Review `doc/en/roadmap.md` and the related specification.
 - Check `git status` and preserve unrelated existing changes.
 - Incorporate remote changes before starting work.
 

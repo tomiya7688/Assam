@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:assam:schemas:program-ir:v2",
+  "title": "ASSAM JSON intermediate representation v2",
+  "description": "Canonical JSON shape emitted by Program.to_json. Every operand is a tagged object; raw strings or integers are rejected in v2. Program.from_dict still accepts v1 documents (no schema_version) and normalizes their operands. Opcode and operand-role semantics are validated separately against the instruction registry.",
+  "type": "object",
+  "required": ["schema_version", "instructions", "labels"],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["opcode", "operands"],
+        "properties": {
+          "opcode": { "type": "string", "minLength": 1 },
+          "operands": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["kind", "index"],
+                  "properties": {
+                    "kind": { "const": "register" },
+                    "index": { "type": "integer", "minimum": 0 }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": ["kind", "value"],
+                  "properties": {
+                    "kind": { "const": "immediate" },
+                    "value": { "type": "integer" }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": ["kind", "name"],
+                  "properties": {
+                    "kind": { "const": "symbol" },
+                    "name": { "type": "string", "minLength": 1 }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": ["kind", "value"],
+                  "properties": {
+                    "kind": { "const": "string" },
+                    "value": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "profile": { "type": "object" }
+  },
+  "additionalProperties": false
+}

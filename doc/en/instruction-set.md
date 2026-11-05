@@ -36,8 +36,10 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 - Write one instruction per line. Opcode names are case-insensitive.
 - Separate operands with whitespace or commas. Text after `;` is a comment.
 - Labels use the form `name:`; branches refer to a label by name.
-- Integers are decimal or `0x` hexadecimal. Registers range from `r0` to `r15`.
-- Operand positions that accept registers also accept immediate values or registers. A string consisting of `r` followed by digits is interpreted as a register.
+- Integers are decimal or `0x` hexadecimal. Registers range from `r0` to `r31`.
+- A string in double quotes `"..."` is a string literal stored as data; its content, including digits, register-like names, and the comment characters `;` and `#`, is never reinterpreted. Escapes: `\"` `\\` `\n` `\t` `\r` `\xHH`.
+- An unquoted word consisting of `r` followed by digits is a register.
+- Operand positions that accept registers also accept immediate values or registers.
 - `Compare` writes `1` when values are equal and `0` otherwise.
 - `Divide` rounds integer division toward zero. `Modulo` is defined as `x - Divide(x, y) * y`.
 - The current VM evaluates only the selected arithmetic operation. A zero right operand is valid for `Add`, `Subtract`, and `Multiply`; it raises `VMError` for `Divide` and `Modulo`. This describes current behavior; formal Core integer width and signedness remain undecided.
@@ -48,25 +50,25 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 
 ## Instruction list
 
-| Instruction | Operands | Behavior |
-|---|---|---|
-| Move | `register, value` | Assign a value to a register |
-| Load | `register, address` | Read from memory |
-| Store | `address, value` | Write to memory |
-| Add / Subtract / Multiply / Divide / Modulo | `register, integer, integer` | Integer arithmetic |
-| And / Or / Xor | `register, integer, integer` | Bitwise operation |
-| Not | `register, integer` | Bitwise inversion |
-| ShiftLeft / ShiftRight | `register, integer, integer` | Shift an integer by the specified count |
-| Compare | `register, value, value` | Equality comparison |
-| Jump | `target` | Unconditional branch |
-| JumpEqual / JumpNotEqual | `target, value, value` | Branch on equality / inequality |
-| Call / Return | `target` / no operands | Call / return |
-| Push / Pop | `value` / `register` | Data-stack operation |
-| Halt | no operands | Stop the VM |
-| CreateTerminal / DestroyTerminal | `name` | Create / destroy a virtual terminal |
-| ConnectTerminal / DisconnectTerminal | `name, name` | Change terminal connections |
-| Send | `sender, recipient, value` | Send a message to a connected terminal |
-| Broadcast | `sender, value` | Send to all connected terminals |
+| Instruction                                 | Operands                     | Behavior                                |
+| ------------------------------------------- | ---------------------------- | --------------------------------------- |
+| Move                                        | `register, value`            | Assign a value to a register            |
+| Load                                        | `register, address`          | Read from memory                        |
+| Store                                       | `address, value`             | Write to memory                         |
+| Add / Subtract / Multiply / Divide / Modulo | `register, integer, integer` | Integer arithmetic                      |
+| And / Or / Xor                              | `register, integer, integer` | Bitwise operation                       |
+| Not                                         | `register, integer`          | Bitwise inversion                       |
+| ShiftLeft / ShiftRight                      | `register, integer, integer` | Shift an integer by the specified count |
+| Compare                                     | `register, value, value`     | Equality comparison                     |
+| Jump                                        | `target`                     | Unconditional branch                    |
+| JumpEqual / JumpNotEqual                    | `target, value, value`       | Branch on equality / inequality         |
+| Call / Return                               | `target` / no operands       | Call / return                           |
+| Push / Pop                                  | `value` / `register`         | Data-stack operation                    |
+| Halt                                        | no operands                  | Stop the VM                             |
+| CreateTerminal / DestroyTerminal            | `name`                       | Create / destroy a virtual terminal     |
+| ConnectTerminal / DisconnectTerminal        | `name, name`                 | Change terminal connections             |
+| Send                                        | `sender, recipient, value`   | Send a message to a connected terminal  |
+| Broadcast                                   | `sender, value`              | Send to all connected terminals         |
 
 `Push`, `Pop`, and all terminal operations starting with `CreateTerminal` are Full-only.
 

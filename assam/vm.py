@@ -1,9 +1,11 @@
 """Reference interpreter for Assam Core and full ASSAM profiles."""
+
 from __future__ import annotations
 
 import operator
 
-from .instruction_set import InstructionSet
+from .instruction_set import DEFAULT_REGISTER_COUNT, InstructionSet
+from .ir import Immediate, Register, StringLiteral, Symbol
 from .terminal import BasicTerminal, TerminalBus
 from .terminal_error import TerminalOperationError
 
@@ -13,7 +15,7 @@ class VMError(RuntimeError):
 
 
 class VM:
-    def __init__(self, program, *, register_count=16, profile=None):
+    def __init__(self, program, *, register_count=DEFAULT_REGISTER_COUNT, profile=None):
         self.instruction_set = InstructionSet(register_count)
         profile = self.instruction_set.resolve_profile(program, profile)
         self.instruction_set.validate(program, profile=profile)
@@ -61,18 +63,25 @@ class VM:
         }
 
     def _value(self, operand):
-        return self.registers[operand] if isinstance(operand, str) and operand in self.registers else operand
+        """Read an operand by its kind: registers are read, literals are data."""
+        if isinstance(operand, Register):
+            return self.registers[self._reg(operand)]
+        if isinstance(operand, Immediate):
+            return operand.value
+        if isinstance(operand, (StringLiteral, Symbol)):
+            return operand.value if isinstance(operand, StringLiteral) else operand.name
+        raise VMError(f"invalid operand: {operand!r}")
 
     def _reg(self, operand):
-        if not isinstance(operand, str) or operand not in self.registers:
+        if not isinstance(operand, Register) or operand.name not in self.registers:
             raise VMError(f"invalid register: {operand!r}")
-        return operand
+        return operand.name
 
     def _target(self, operand):
-        if isinstance(operand, str) and operand in self.program.labels:
-            return self.program.labels[operand]
-        if isinstance(operand, int):
-            return operand
+        if isinstance(operand, Symbol) and operand.name in self.program.labels:
+            return self.program.labels[operand.name]
+        if isinstance(operand, Immediate):
+            return operand.value
         raise VMError(f"invalid jump target: {operand!r}")
 
     def step(self):
@@ -88,10 +97,18 @@ class VM:
         except VMError as exc:
             raise VMError(f"{exc} at instruction {self.ip}: {instruction}") from exc
         except TerminalOperationError as exc:
-            line = f" (line {instruction.source_line})" if instruction.source_line is not None else ""
-            raise VMError(f"terminal error at instruction {self.ip}{line}: {instruction.opcode}: {exc}") from exc
+            line = (
+                f" (line {instruction.source_line})"
+                if instruction.source_line is not None
+                else ""
+            )
+            raise VMError(
+                f"terminal error at instruction {self.ip}{line}: {instruction.opcode}: {exc}"
+            ) from exc
         except (IndexError, TypeError, ValueError, ZeroDivisionError) as exc:
-            raise VMError(f"execution error at instruction {self.ip}: {instruction}: {exc}") from exc
+            raise VMError(
+                f"execution error at instruction {self.ip}: {instruction}: {exc}"
+            ) from exc
         if next_ip is not None:
             self.ip = next_ip
         elif not self.halted:
@@ -127,7 +144,9 @@ class VM:
         self.registers[self._reg(args[0])] = operator.invert(self._value(args[1]))
 
     def _op_compare(self, definition, args):
-        self.registers[self._reg(args[0])] = int(self._value(args[1]) == self._value(args[2]))
+        self.registers[self._reg(args[0])] = int(
+            self._value(args[1]) == self._value(args[2])
+        )
 
     def _op_jump(self, definition, args):
         return self._target(args[0])

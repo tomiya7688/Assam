@@ -52,6 +52,11 @@ class StringLiteralTests(unittest.TestCase):
         with self.assertRaisesRegex(ParseError, "unterminated"):
             parse_program('Move r0 "abc\nHalt')
 
+    def test_literal_must_be_followed_by_separator(self):
+        with self.assertRaisesRegex(ParseError, "separator"):
+            parse_program('Move r0 "text"r1\nHalt')
+        self.assertEqual(run_r0('Move r0 "text",\nHalt'), "text")
+
     def test_bad_hex_escape_is_rejected(self):
         with self.assertRaisesRegex(ParseError, r"\\x"):
             parse_program('Move r0 "\\xZZ"\nHalt')

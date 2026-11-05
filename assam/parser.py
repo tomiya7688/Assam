@@ -34,6 +34,10 @@ def _tokenize(line, line_number):
             break
         elif ch == '"':
             i, text = _quoted(line, i, line_number)
+            if i < n and line[i] not in _BARE_STOP:
+                raise ParseError(
+                    f"line {line_number}: string literal must be followed by a separator"
+                )
             tokens.append((True, text))
         else:
             start = i

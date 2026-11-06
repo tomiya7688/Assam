@@ -144,20 +144,35 @@ def coerce_operand(value: Any) -> Operand:
     raise ValueError(f"unsupported operand value: {value!r}")
 
 
+_OPERAND_KEYS = {
+    "register": {"kind", "index"},
+    "immediate": {"kind", "value"},
+    "symbol": {"kind", "name"},
+    "string": {"kind", "value"},
+}
+
+
 def operand_from_dict(value: Any) -> Operand:
-    """Read one tagged (schema v2) operand object."""
+    """Read one tagged (schema v2) operand object.
+
+    Only the keys of the declared kind are accepted; any extra key is rejected
+    so that malformed input never loads silently.
+    """
     if not isinstance(value, dict) or not isinstance(value.get("kind"), str):
         raise ValueError("operand must be an object with a string kind")
     kind = value["kind"]
+    if kind not in _OPERAND_KEYS:
+        raise ValueError(f"unknown operand kind: {kind!r}")
+    extra = set(value) - _OPERAND_KEYS[kind]
+    if extra:
+        raise ValueError(f"unexpected keys for {kind} operand: {sorted(extra)}")
     if kind == "register":
         return Register(value.get("index"))
     if kind == "immediate":
         return Immediate(value.get("value"))
     if kind == "symbol":
         return Symbol(value.get("name"))
-    if kind == "string":
-        return StringLiteral(value.get("value"))
-    raise ValueError(f"unknown operand kind: {kind!r}")
+    return StringLiteral(value.get("value"))
 
 
 @dataclass(frozen=True)

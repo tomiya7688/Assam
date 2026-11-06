@@ -128,6 +128,23 @@ class OperandJsonTests(unittest.TestCase):
                 }
             )
 
+    def test_extra_keys_in_tagged_operand_are_rejected(self):
+        with self.assertRaisesRegex(ValueError, "unexpected keys"):
+            Program.from_dict(
+                {
+                    "schema_version": 2,
+                    "instructions": [
+                        {
+                            "opcode": "Move",
+                            "operands": [
+                                {"kind": "register", "index": 0, "extra": 1},
+                                {"kind": "immediate", "value": 1},
+                            ],
+                        }
+                    ],
+                }
+            )
+
     def test_unsupported_schema_version_is_rejected(self):
         with self.assertRaises(ValueError):
             Program.from_dict({"schema_version": 3, "instructions": []})

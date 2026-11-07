@@ -4,7 +4,7 @@ Language: [日本語](../../jp/設計/Core意味論.md) | English
 
 Target issues: #3 (execution semantics of the Core ISA), connected to #2 and #4. Decisions: DEC-02 to DEC-09, DEC-14, PRO-01 to PRO-09.
 
-> Classification: "Confirmed" means stated in the consumer contract of Issue #3; "Proposed" means decided by this design. The only open item is Q1 (`mulhu`/`mulhs`).
+> Classification: "Confirmed" means stated in the consumer contract of Issue #3; "Proposed" means decided by this design. The former Q1 (`mulhu`/`mulhs`) is decided in PRO-16.
 
 ## 1. Machine model
 
@@ -46,8 +46,8 @@ Notation: `rd` = destination register, `rs` = source register, `imm` = immediate
 | Instruction       | Form                 | Meaning                                                                                                                                                                                             |
 | ----------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `add` `sub` `mul` | `op rd, rs1, rs2`    | modulo 2^64                                                                                                                                                                                         |
-| `mulhu`           | `mulhu rd, rs1, rs2` | Upper 64 bits of the unsigned 128-bit product (**Q1: recommend including**)                                                                                                                         |
-| `mulhs`           | `mulhs rd, rs1, rs2` | Upper 64 bits of the signed 128-bit product (**Q1**)                                                                                                                                                |
+| `mulhu`           | `mulhu rd, rs1, rs2` | Upper 64 bits of the unsigned 128-bit product (PRO-16)                                                                                                                         |
+| `mulhs`           | `mulhs rd, rs1, rs2` | Upper 64 bits of the signed 128-bit product (PRO-16)                                                                                                                                                |
 | `divu` `remu`     | `op rd, rs1, rs2`    | Unsigned quotient/remainder. `rs2==0` is a `div_by_zero` trap                                                                                                                                       |
 | `divs` `rems`     | `op rd, rs1, rs2`    | Signed (quotient rounds toward zero; `rems = a - divs(a,b)*b`, so the remainder has the sign of the dividend). `rs2==0` is a `div_by_zero` trap. `MIN / -1 = MIN`, `MIN % -1 = 0` (no trap; PRO-03) |
 | `and` `or` `xor`  | `op rd, rs1, rs2`    | Bitwise operations                                                                                                                                                                                  |
@@ -116,7 +116,7 @@ Rejected before execution: unknown opcode, operand count/kind violation, registe
 
 Core satisfies the following through lowering, **without adding them as instructions** (DEC-09).
 
-- **checked overflow**: For signed addition `c = a + b`, overflow is detected by testing `((a ^ c) & (b ^ c)) < 0` with `xor`/`and`/`slt`, and branching to `trap` if true. For multiplication overflow, use `mulhs` (Q1) and compare the upper 64 bits with the sign extension.
+- **checked overflow**: For signed addition `c = a + b`, overflow is detected by testing `((a ^ c) & (b ^ c)) < 0` with `xor`/`and`/`slt`, and branching to `trap` if true. For multiplication overflow, use `mulhs` (PRO-16) and compare the upper 64 bits with the sign extension.
   Example (`c` is the sum): `add c, a, b` / `xor t1, a, c` / `xor t2, b, c` / `and t1, t1, t2` / `slt t1, t1, r0` / `brnz t1, overflow`.
 - **Arbitrary semantic widths** (8/16/32 bit, etc.): after a 64-bit operation, sign/zero-extend with `shl` + `sar`/`shr` to preserve the width.
 - **Beyond 64 bits** (including x*): the backend lowers to a limb sequence (64-bit words), and carry/borrow is obtained with `sltu`. Example: 128-bit addition `(hi,lo)=(ah,al)+(bh,bl)` is `add lo`, `sltu c, lo, al`, `add hi`, `add hi, hi, c`.

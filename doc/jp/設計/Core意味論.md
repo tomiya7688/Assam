@@ -4,7 +4,7 @@
 
 対象Issue: #3（Core ISAの実行意味）、#2・#4へ接続。決定: DEC-02〜DEC-09, DEC-14、PRO-01〜PRO-09。
 
-> 区分: 「確定」はIssue #3のconsumer contractに明記された事項、「提案」は本設計が決めた部分。未決はQ1（`mulhu`/`mulhs`）のみ。
+> 区分: 「確定」はIssue #3のconsumer contractに明記された事項、「提案」は本設計が決めた部分。旧Q1（`mulhu`/`mulhs`）はPRO-16で決定済み。
 
 ## 1. マシンモデル
 
@@ -46,8 +46,8 @@
 | 命令              | 形                   | 意味                                                                                                                                                                |
 | ----------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `add` `sub` `mul` | `op rd, rs1, rs2`    | modulo 2^64                                                                                                                                                         |
-| `mulhu`           | `mulhu rd, rs1, rs2` | 符号なし128bit積の上位64bit（**Q1: 含める推奨**）                                                                                                                   |
-| `mulhs`           | `mulhs rd, rs1, rs2` | 符号付き128bit積の上位64bit（**Q1**）                                                                                                                               |
+| `mulhu`           | `mulhu rd, rs1, rs2` | 符号なし128bit積の上位64bit（PRO-16）                                                                                                                   |
+| `mulhs`           | `mulhs rd, rs1, rs2` | 符号付き128bit積の上位64bit（PRO-16）                                                                                                                               |
 | `divu` `remu`     | `op rd, rs1, rs2`    | 符号なし商/剰余。`rs2==0`は`div_by_zero` trap                                                                                                                       |
 | `divs` `rems`     | `op rd, rs1, rs2`    | 符号付き（商は0方向丸め、`rems = a - divs(a,b)*b`で剰余の符号は被除数と同じ）。`rs2==0`は`div_by_zero` trap。`MIN / -1 = MIN`、`MIN % -1 = 0`（trapしない。PRO-03） |
 | `and` `or` `xor`  | `op rd, rs1, rs2`    | ビット演算                                                                                                                                                          |
@@ -116,7 +116,7 @@
 
 Coreは次を**命令として追加せず**、loweringで満たす（DEC-09）。
 
-- **checked overflow**: 符号付き加算`c = a + b`のoverflowは、`xor`/`and`/`slt`で`((a ^ c) & (b ^ c)) < 0`を判定し、真なら`trap`へ分岐する。乗算overflowは`mulhs`（Q1）で上位64bitを符号拡張と比較する。
+- **checked overflow**: 符号付き加算`c = a + b`のoverflowは、`xor`/`and`/`slt`で`((a ^ c) & (b ^ c)) < 0`を判定し、真なら`trap`へ分岐する。符号付き乗算のoverflowは`mulhs`（PRO-16）で上位64bitを下位64bitの符号拡張と比較して判定し、符号なし64bit乗算のoverflowは`mulhu`の結果が非0なら`trap`へ分岐する。
   例（`c`は加算結果）: `add c, a, b` / `xor t1, a, c` / `xor t2, b, c` / `and t1, t1, t2` / `slt t1, t1, r0` / `brnz t1, overflow`。
 - **任意の意味幅**（8/16/32bit等）: 64bit演算後に`shl`+`sar`/`shr`で符号/ゼロ拡張して幅を保つ。
 - **64bit超**（x*を含む）: backendがlimb列（64bit word）へlowerし、carry/borrowは`sltu`で得る。例: 128bit加算`(hi,lo)=(ah,al)+(bh,bl)`は`add lo`・`sltu c, lo, al`・`add hi`・`add hi, hi, c`。

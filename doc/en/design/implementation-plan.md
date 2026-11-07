@@ -32,10 +32,10 @@ This splits the canonical design documents ([Overall design](overview.md) and ot
 | A2  | Expand CI gates                                   | #13     | —                 | —                     | P0       |
 | A3  | Release signing / attestation                     | #29     | A1                | —                     | P0       |
 | B1  | Typed operands and Full string preservation       | #10     | A2 (smoke only)   | —                     | High     |
-| B3  | registry schema v3                                | #2      | B1                | Q1                    | High     |
+| B3  | registry schema v3                                | #2      | B1                | —                     | High     |
 | B2  | Core v1 canonical parser/emitter                  | #1      | B1, B3            | —                     | High     |
 | B5  | conformance corpus and runner                     | #8, #13 | B3                | —                     | High     |
-| B4  | Core v1 reference VM                              | #3      | B2, B3, B5        | Q1                    | High     |
+| B4  | Core v1 reference VM                              | #3      | B2, B3, B5        | —                     | High     |
 | B6  | C frontend, analyzer, Draft removal               | #1, #3  | B4                | Q4                    | Medium   |
 | C1  | Mapping table schema v2, loader, expander         | #4      | B3                | —                     | Medium   |
 | C2  | x64/ARM64/RISC-V v1 tables (L1-L3)                | #4      | C1, B4            | —                     | Medium   |
@@ -93,7 +93,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 ### B3 registry schema v3 (#2)
 
 - Design: [Registry and conformance §2](registry-and-conformance.md), [Core semantics §2](core-semantics.md)
-- Prerequisite decision: Q1 (whether to include `mulhu`/`mulhs`).
+- Prerequisite decision: Q1 is decided ([PRO-16](decision-log.md); `mulhu`/`mulhs` are included).
 - Deliverables: `assam/data/instruction_registry.json` (v3), `instruction-registry-v3.schema.json`, updated loading in `assam/instruction_set.py`, consistency checks, regression tests against v2 (acceptance/rejection of Full instructions unchanged).
 - Acceptance: schema validation, consistency checks, Full regression, all v1 instructions (about 45) defined. `handler` leaves the registry and becomes a Python-side table.
 
@@ -113,7 +113,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 ### B4 Core v1 reference VM (#3)
 
 - Design: [Core semantics](core-semantics.md)
-- Prerequisite decision: Q1.
+- Prerequisite decision: Q1 is decided (PRO-16).
 - Deliverables: `assam/core_vm.py` (a class separate from the Full VM), observation JSON generation, trap kinds. The Full VM is not changed.
 - Acceptance: [Core semantics §7](core-semantics.md). All instructions, all traps, boundary values, and no side effects on trap are verified by the corpus.
 - Tests: via the corpus (`tests/test_conformance.py` runs all cases) plus unit tests.

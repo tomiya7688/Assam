@@ -12,7 +12,11 @@ import venv
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED_DATA = {"instruction_registry.json", "program-ir-v1.schema.json"}
+REQUIRED_DATA = {
+    "instruction_registry.json",
+    "instruction-registry-v3.schema.json",
+    "program-ir-v1.schema.json",
+}
 
 
 def run(*command, cwd=None):

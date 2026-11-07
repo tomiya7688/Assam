@@ -66,6 +66,10 @@ registryは**命令契約と対応情報**の正本であり、実行ロジッ�
 | 共存   | 一定期間は`instruction_registry.json`(v3)のみを同梱。v2を読むのは過去の対応表検査に使うtestだけに限定し、v3完了時に削除 |
 | schema | `instruction-registry-v3.schema.json`を追加し、registry自身をschema検証する                                             |
 
+実装状況（WP-B3、2026-11-07）: v3には、Core v1の46命令（`id`は`core.<mnemonic>`）に加え、現行のDraft Core/Full命令を`draft.<name>`・`full.<name>`として移した。Draftは`availability`の`since: "draft"`、`target_mapping_id`は`assam.core.draft.*`のまま残す。Core v1とDraft/Fullは名前空間が別で（例: `mov`はDraftの別名、`add`はDraftの`Add`の正式名と衝突する）、Full parser・VM・analyzerは従来どおりDraft/Fullの定義だけを引き、Core v1の定義は`InstructionSet.core_v1_definitions()`で別に引く（B2/B4で使う）。Core v1の幅・符号・範囲などの数値は、他言語で桁あふれしないよう10進文字列で持つ。
+
+旧v2（`assam/data/instruction_registry_v2.json`）は凍結したまま同梱し、Draft向けの対応表検査（`assam check-target-*`、既定のregistry）だけが読む。対応表を版ごとに作り直すC3で、v2と`draft.*`を同時に削除する。Draft/Fullの定義がv2と同一であることは`tests/test_registry_v3.py`で検証する。`ordinary`命令の3ターゲット`in_scope`検査は対応表が`assam.core.1.*`になるC1/C3で追加する。
+
 ### 2.2 検証（実行前に弾く）
 
 - schema検証（開発依存の`jsonschema`をdev extraに追加。ランタイムは標準ライブラリのみ）。

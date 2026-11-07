@@ -105,6 +105,7 @@ Diagnostics have a stable code and a position. Message wording may change, but `
 | `core.syntax.separator`                                              | missing or extra comma between operands                                                   |
 | `core.syntax.register_range`                                         | outside `r0`-`r31`                                                                        |
 | `core.syntax.immediate_range`                                        | immediate outside the range allowed for that instruction                                  |
+| `core.syntax.label_dangling` | a label has no instruction after it (IR labels point at instructions) |
 | `core.syntax.label_duplicate` / `label_undefined` / `label_reserved` | label rule violation                                                                      |
 | `core.syntax.line_form`                                              | multiple instructions on one line, label and instruction on the same line, etc.           |
 | `core.syntax.encoding`                                               | UTF-8 violation, BOM, control characters                                                  |

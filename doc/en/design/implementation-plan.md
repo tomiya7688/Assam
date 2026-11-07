@@ -104,6 +104,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 - Deliverables: `assam/core_parser.py` (Core-specific, one class per file), `assam/core_emitter.py`, diagnostic classes, IR stamp `core/1`.
 - Acceptance: negative cases per diagnostic code, golden round trip, Core -> Full upward-compatibility tests, `assam json --profile core` handles v1.
 - Tests: `tests/test_core_parser.py`, `tests/test_core_emitter.py`, `tests/test_core_in_full.py`.
+- Status: implemented (`assam/core_parser.py`, `core_emitter.py`, `core_diagnostic.py`; tests consolidated in `tests/test_core_parser.py`; `assam json --profile core-v1` handles v1; the Draft `--profile core` stays until Q4 is decided; Core v1 execution awaits B4; diagnostic `core.syntax.label_dangling` added).
 
 ### B5 conformance corpus and runner (#8, #13)
 

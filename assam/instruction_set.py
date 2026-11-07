@@ -50,6 +50,11 @@ class InstructionSet:
         # v1の印(version "1", registry_schema_version 3)はB2で導入し、Draftは廃止予定(Q4)。
         return ProgramProfile("Assam Core", "draft", 2)
 
+    @classmethod
+    # {"責務": "Core v1のprofile印を返す", "処理": ["固定値を返す"], "引数": [], "戻り値": ["ProgramProfile(Assam Core, 1, 3)"], "副作用": [], "エラー": []}
+    def core_v1_profile_marker(cls) -> ProgramProfile:
+        return ProgramProfile("Assam Core", "1", 3)
+
     def resolve_profile(self, program: Program, requested: str | None = None) -> str:
         if requested is not None and requested not in {"core", "full"}:
             raise ValueError(f"unknown ASSAM profile: {requested!r}")

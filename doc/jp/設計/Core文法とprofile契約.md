@@ -105,6 +105,7 @@ done:
 | `core.syntax.separator`                                              | operand間のカンマ欠落・余分なカンマ                         |
 | `core.syntax.register_range`                                         | `r0`〜`r31`の範囲外                                         |
 | `core.syntax.immediate_range`                                        | 即値がその命令の許容範囲外                                  |
+| `core.syntax.label_dangling`                                         | label定義の後ろに命令がない（IRのlabel表は命令位置を指す）  |
 | `core.syntax.label_duplicate` / `label_undefined` / `label_reserved` | label規則違反                                               |
 | `core.syntax.line_form`                                              | 1行複数命令、label+命令同一行など                           |
 | `core.syntax.encoding`                                               | UTF-8違反、BOM、制御文字                                    |

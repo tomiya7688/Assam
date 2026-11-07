@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from .generator import read
 from .parser import parse_program
+from .core_parser import CoreParser
 from .vm import VM
 from .c_frontend import CTranslator
 from .analyzer import ProgramAnalyzer
@@ -12,7 +13,7 @@ from .target_coverage import build_target_coverage_template, check_target_covera
 def main(argv=None):
     parser=argparse.ArgumentParser(prog="assam"); sub=parser.add_subparsers(dest="command",required=True)
     run=sub.add_parser("run"); run.add_argument("file",type=Path); run.add_argument("--json",action="store_true"); run.add_argument("--profile",choices=("core","full"))
-    convert=sub.add_parser("json"); convert.add_argument("source",type=Path); convert.add_argument("-o","--output",type=Path); convert.add_argument("--profile",choices=("core",),help="validate and mark the output as Assam Core")
+    convert=sub.add_parser("json"); convert.add_argument("source",type=Path); convert.add_argument("-o","--output",type=Path); convert.add_argument("--profile",choices=("core","core-v1"),help="core: validate and mark as Draft Core; core-v1: parse strict Core v1 canonical text")
     c_convert=sub.add_parser("from-c",help="translate the supported C integer subset to ASSAM")
     c_convert.add_argument("source",type=Path); c_convert.add_argument("-o","--output",type=Path)
     analyze=sub.add_parser("analyze",help="show static instruction and control-flow analysis")
@@ -36,7 +37,10 @@ def main(argv=None):
         if args.command=="run":
             p=read(args.file) if args.json else parse_program(args.file.read_text(encoding="utf-8")); print(VM(p,profile=args.profile).run())
         elif args.command=="json":
-            program=parse_program(args.source.read_text(encoding="utf-8"))
+            if args.profile == "core-v1":
+                program=CoreParser().parse(args.source.read_text(encoding="utf-8"))
+            else:
+                program=parse_program(args.source.read_text(encoding="utf-8"))
             if args.profile == "core":
                 instruction_set=InstructionSet()
                 instruction_set.validate(program,profile="core")

@@ -106,8 +106,10 @@ class StringLiteral:
                 out.append("\\t")
             elif ch == "\r":
                 out.append("\\r")
-            elif ord(ch) < 0x20 or ord(ch) == 0x7F:
+            elif ord(ch) < 0x20 or 0x7F <= ord(ch) <= 0x9F:
                 out.append(f"\\x{ord(ch):02x}")
+            elif ord(ch) in (0x2028, 0x2029):
+                out.append(f"\\u{ord(ch):04x}")
             else:
                 out.append(ch)
         return '"' + "".join(out) + '"'
@@ -185,7 +187,11 @@ class Instruction:
     source_line: int | None = None
 
     def __post_init__(self):
-        if not self.opcode or self.opcode != self.opcode.strip():
+        if (
+            not isinstance(self.opcode, str)
+            or not self.opcode
+            or self.opcode != self.opcode.strip()
+        ):
             raise ValueError("opcode must be a non-empty, trimmed string")
         object.__setattr__(
             self, "operands", tuple(coerce_operand(x) for x in self.operands)
@@ -198,6 +204,15 @@ class Instruction:
     def from_dict(cls, value, *, schema_version: int = IR_SCHEMA_VERSION):
         if not isinstance(value, dict) or not isinstance(value.get("opcode"), str):
             raise ValueError("instruction must contain a string opcode")
+        if type(schema_version) is not int or schema_version not in (
+            1,
+            IR_SCHEMA_VERSION,
+        ):
+            raise ValueError(f"unsupported IR schema_version: {schema_version!r}")
+        if schema_version != 1:
+            unknown = set(value) - {"opcode", "operands"}
+            if unknown:
+                raise ValueError(f"unknown instruction keys: {sorted(unknown)}")
         operands = value.get("operands", [])
         if not isinstance(operands, list):
             raise ValueError("instruction operands must be a list")
@@ -242,6 +257,17 @@ class Program:
             IR_SCHEMA_VERSION,
         ):
             raise ValueError(f"unsupported IR schema_version: {schema_version!r}")
+        if schema_version != 1:
+            if "instructions" not in value:
+                raise ValueError("v2 program must contain instructions")
+            unknown = set(value) - {
+                "schema_version",
+                "instructions",
+                "labels",
+                "profile",
+            }
+            if unknown:
+                raise ValueError(f"unknown program keys: {sorted(unknown)}")
         items = value.get("instructions", [])
         if not isinstance(items, list):
             raise ValueError("program instructions must be a list")

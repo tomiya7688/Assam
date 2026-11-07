@@ -221,5 +221,41 @@ def program_to_text(program):
     return "\n".join(lines) + "\n"
 
 
+class ReviewFollowUpTests(unittest.TestCase):
+    def test_instruction_from_dict_rejects_unsupported_version(self):
+        with self.assertRaises(ValueError):
+            Instruction.from_dict({"opcode": "Halt"}, schema_version=3)
+
+    def test_non_string_opcode_is_value_error(self):
+        with self.assertRaises(ValueError):
+            Instruction(5)
+
+    def test_v2_requires_instructions_and_known_keys(self):
+        with self.assertRaises(ValueError):
+            Program.from_dict({"schema_version": 2, "instrucions": []})
+        with self.assertRaises(ValueError):
+            Program.from_dict({"schema_version": 2, "instructions": [], "x": 1})
+        with self.assertRaises(ValueError):
+            Program.from_dict(
+                {"schema_version": 2, "instructions": [{"opcode": "Halt", "x": 1}]}
+            )
+
+    def test_unicode_line_separators_round_trip(self):
+        for code in (0x85, 0x2028, 0x2029, 0x0B, 0x1C):
+            ch = chr(code)
+            text = f"a{ch}b"
+            source = f"Move r0 {StringLiteral(text)}\nHalt"
+            self.assertEqual(run_r0(source), text)
+
+    def test_quote_must_be_preceded_by_separator(self):
+        for source in ('Move r0"x"', 'Compare r0 "a""a"'):
+            with self.assertRaises(ParseError):
+                parse_program(source)
+
+    def test_register_shaped_label_is_rejected(self):
+        with self.assertRaises(ParseError):
+            parse_program("r1:\nHalt")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -15,6 +15,7 @@ from .instruction_set import InstructionSet
 _instruction_set = InstructionSet()
 
 _ESCAPES = {"\\": "\\", '"': '"', "n": "\n", "t": "\t", "r": "\r"}
+_SEPARATORS = set(" \t\r\n,;#")
 _BARE_STOP = set(' \t\r\n,";#"')
 
 
@@ -34,7 +35,7 @@ def _tokenize(line, line_number):
             break
         elif ch == '"':
             i, text = _quoted(line, i, line_number)
-            if i < n and line[i] not in _BARE_STOP:
+            if i < n and line[i] not in _SEPARATORS:
                 raise ParseError(
                     f"line {line_number}: string literal must be followed by a separator"
                 )
@@ -43,6 +44,10 @@ def _tokenize(line, line_number):
             start = i
             while i < n and line[i] not in _BARE_STOP:
                 i += 1
+            if i < n and line[i] == '"':
+                raise ParseError(
+                    f"line {line_number}: string literal must be preceded by a separator"
+                )
             tokens.append((False, line[start:i]))
     return tokens
 
@@ -77,6 +82,16 @@ def _quoted(line, start, line_number):
                 )
             out.append(chr(int(digits, 16)))
             i += 4
+        elif code == "u":
+            digits = line[i + 2 : i + 6]
+            if len(digits) != 4 or any(
+                c not in "0123456789abcdefABCDEF" for c in digits
+            ):
+                raise ParseError(
+                    f"line {line_number}: invalid \\u escape in string literal"
+                )
+            out.append(chr(int(digits, 16)))
+            i += 6
         elif code in _ESCAPES:
             out.append(_ESCAPES[code])
             i += 2
@@ -110,6 +125,10 @@ def parse(line, *, line_number=None):
         label = head[:-1]
         if not label:
             raise ParseError(f"line {line_number}: empty label")
+        if isinstance(_bare_operand(label), Register):
+            raise ParseError(
+                f"line {line_number}: label {label!r} looks like a register"
+            )
         return (label,)
     definition = _instruction_set.definition(head)
     opcode = definition["canonical_name"] if definition is not None else head

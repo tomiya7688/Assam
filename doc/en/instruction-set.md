@@ -37,7 +37,7 @@ The current Python implementation accepts these Core instructions: `Move`, `Load
 - Separate operands with whitespace or commas. Text after `;` is a comment.
 - Labels use the form `name:`; branches refer to a label by name.
 - Integers are decimal or `0x` hexadecimal. Registers range from `r0` to `r31`.
-- A string in double quotes `"..."` is a string literal stored as data; its content, including digits, register-like names, and the comment characters `;` and `#`, is never reinterpreted. Escapes: `\"` `\\` `\n` `\t` `\r` `\xHH`.
+- A string in double quotes `"..."` is a string literal stored as data; its content, including digits, register-like names, and the comment characters `;` and `#`, is never reinterpreted. Escapes: `\"` `\\` `\n` `\t` `\r` `\xHH`, `\uHHHH`.
 - An unquoted word consisting of `r` followed by digits is a register.
 - Operand positions that accept registers also accept immediate values or registers.
 - `Compare` writes `1` when values are equal and `0` otherwise.

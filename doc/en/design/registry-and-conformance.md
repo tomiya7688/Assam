@@ -66,6 +66,10 @@ Key points:
 | Coexistence | For a period, ship only `instruction_registry.json` (v3). Reading v2 is limited to tests used for checking past mapping tables, and is deleted when v3 is complete |
 | schema      | Add `instruction-registry-v3.schema.json` and validate the registry itself against the schema                                                                      |
 
+Implementation status (WP-B3, 2026-11-07): v3 holds the 46 Core v1 instructions (`id` is `core.<mnemonic>`) plus the current Draft Core/Full instructions moved in as `draft.<name>` / `full.<name>`. Draft entries use `since: "draft"` in `availability` and keep `assam.core.draft.*` as `target_mapping_id`. Core v1 and Draft/Full are separate namespaces (for example, `mov` is a Draft alias and `add` collides with the canonical name of Draft `Add`); the Full parser, VM, and analyzer keep using only the Draft/Full definitions, while Core v1 definitions are read separately through `InstructionSet.core_v1_definitions()` (used by B2/B4). Numeric values such as the width, signedness, and ranges of Core v1 are decimal strings so that they do not overflow in other languages.
+
+The old v2 (`assam/data/instruction_registry_v2.json`) stays shipped frozen and is read only by the Draft mapping checks (`assam check-target-*`, default registry). C3, which rebuilds the mappings per version, removes v2 and `draft.*` together. `tests/test_registry_v3.py` verifies that the Draft/Full definitions are identical to v2. The three-target `in_scope` check for `ordinary` instructions is added in C1/C3, when the mappings become `assam.core.1.*`.
+
 ### 2.2 Validation (reject before execution)
 
 - Schema validation (add the development dependency `jsonschema` to a dev extra; the runtime remains standard library only).

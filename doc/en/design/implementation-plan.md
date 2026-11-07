@@ -96,6 +96,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 - Prerequisite decision: Q1 is decided ([PRO-16](decision-log.md); `mulhu`/`mulhs` are included).
 - Deliverables: `assam/data/instruction_registry.json` (v3), `instruction-registry-v3.schema.json`, updated loading in `assam/instruction_set.py`, consistency checks, regression tests against v2 (acceptance/rejection of Full instructions unchanged).
 - Acceptance: schema validation, consistency checks, Full regression, all v1 instructions (about 45) defined. `handler` leaves the registry and becomes a Python-side table.
+- Status: implemented (v2 is shipped frozen for the Draft mapping checks; see [registry and conformance §2.1](registry-and-conformance.md)).
 
 ### B2 Core v1 canonical parser/emitter (#1)
 

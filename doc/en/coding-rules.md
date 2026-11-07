@@ -17,7 +17,7 @@ Every contributor, human or AI agent (Claude Code, Codex, ChatGPT, Copilot), mus
 - New modules start with `from __future__ import annotations` and a one-line module docstring.
 - Add no external dependencies (standard library only; pytest for tests).
 - Fail explicitly on invalid input: `ValueError` for validation, `VMError` for VM runtime. No silent correction or approximation.
-- `assam/data/instruction_registry.json` is the single source of truth for instruction specs (operands, effects, traps, mapping IDs); do not duplicate it in code.
+- `assam/data/instruction_registry.json` (schema v3) is the single source of truth for instruction specs (operands, effects, traps, mapping IDs); do not duplicate it in code.
 - When changing JSON data, keep the matching `assam/data/*.schema.json` consistent.
 
 ## Tests

@@ -1,16 +1,24 @@
 """Static summaries and control-flow analysis for ASSAM programs."""
+
 from __future__ import annotations
 
 from collections import Counter, deque
 
-from .instruction_set import InstructionSet
-from .ir import Program
+from .instruction_set import DEFAULT_REGISTER_COUNT, InstructionSet
+from .ir import Program, Register, Symbol
+
+
+def _target_index(program: Program, operand) -> int:
+    """Resolve a control-flow operand to an instruction index."""
+    if isinstance(operand, Symbol):
+        return program.labels[operand.name]
+    return operand.value
 
 
 class ProgramAnalyzer:
     """Produce deterministic instruction, register, and CFG summaries."""
 
-    def __init__(self, register_count: int = 16) -> None:
+    def __init__(self, register_count: int = DEFAULT_REGISTER_COUNT) -> None:
         self.instruction_set = InstructionSet(register_count)
 
     def analyze(self, program: Program, *, profile: str | None = None) -> dict:
@@ -34,12 +42,12 @@ class ProgramAnalyzer:
             data_memory_read_instructions += int(memory_effects["read"])
             data_memory_write_instructions += int(memory_effects["write"])
             for index, operand in enumerate(instruction.operands):
-                if not isinstance(operand, str) or not operand.startswith("r") or not operand[1:].isdigit():
+                if not isinstance(operand, Register):
                     continue
                 if index in read_operands:
-                    reads[operand] += 1
+                    reads[operand.name] += 1
                 if index in write_operands:
-                    writes[operand] += 1
+                    writes[operand.name] += 1
 
         leaders = self._leaders(program)
         blocks = self._blocks(program, leaders)
@@ -51,11 +59,15 @@ class ProgramAnalyzer:
         for block in blocks:
             terminal_index = block["end"]
             terminal = program.instructions[terminal_index]
-            block["successors"] = sorted({
-                block_by_instruction[target]
-                for target in self._successor_instructions(program, terminal_index, terminal)
-                if target in block_by_instruction
-            })
+            block["successors"] = sorted(
+                {
+                    block_by_instruction[target]
+                    for target in self._successor_instructions(
+                        program, terminal_index, terminal
+                    )
+                    if target in block_by_instruction
+                }
+            )
 
         reachable_blocks = self._reachable_blocks(blocks)
         unreachable = [
@@ -88,16 +100,38 @@ class ProgramAnalyzer:
         """Format an analysis report for a terminal."""
         lines = [f"Instructions: {report['instruction_count']}", "Opcodes:"]
         if report["opcode_counts"]:
-            lines.extend(f"  {name}: {count}" for name, count in report["opcode_counts"].items())
+            lines.extend(
+                f"  {name}: {count}" for name, count in report["opcode_counts"].items()
+            )
         else:
             lines.append("  (none)")
-        lines.append("Register reads: " + self._format_registers(report["register_reads"]))
-        lines.append("Register writes: " + self._format_registers(report["register_writes"]))
-        lines.append(f"Data-memory read instructions: {report['data_memory_read_instructions']}")
-        lines.append(f"Data-memory write instructions: {report['data_memory_write_instructions']}")
+        lines.append(
+            "Register reads: " + self._format_registers(report["register_reads"])
+        )
+        lines.append(
+            "Register writes: " + self._format_registers(report["register_writes"])
+        )
+        lines.append(
+            f"Data-memory read instructions: {report['data_memory_read_instructions']}"
+        )
+        lines.append(
+            f"Data-memory write instructions: {report['data_memory_write_instructions']}"
+        )
         lines.append(f"Basic blocks: {len(report['basic_blocks'])}")
-        lines.append("Control-flow edges: " + (", ".join(f"B{edge['from']}->B{edge['to']}" for edge in report["control_flow_edges"]) or "(none)"))
-        lines.append("Unreachable instructions: " + (", ".join(map(str, report["unreachable_instructions"])) or "(none)"))
+        lines.append(
+            "Control-flow edges: "
+            + (
+                ", ".join(
+                    f"B{edge['from']}->B{edge['to']}"
+                    for edge in report["control_flow_edges"]
+                )
+                or "(none)"
+            )
+        )
+        lines.append(
+            "Unreachable instructions: "
+            + (", ".join(map(str, report["unreachable_instructions"])) or "(none)")
+        )
         return "\n".join(lines)
 
     def _leaders(self, program: Program) -> list[int]:
@@ -110,7 +144,7 @@ class ProgramAnalyzer:
             flow = definition["flow"]
             if flow in {"jump", "conditional", "call"}:
                 target = instruction.operands[0]
-                leaders.add(program.labels[target] if isinstance(target, str) else target)
+                leaders.add(_target_index(program, target))
             if flow in {"jump", "conditional", "call", "return", "halt"}:
                 if index + 1 < count:
                     leaders.add(index + 1)
@@ -119,21 +153,27 @@ class ProgramAnalyzer:
     def _blocks(self, program: Program, leaders: list[int]) -> list[dict]:
         blocks = []
         for block_index, start in enumerate(leaders):
-            end = leaders[block_index + 1] - 1 if block_index + 1 < len(leaders) else len(program.instructions) - 1
-            blocks.append({"id": block_index, "start": start, "end": end, "successors": []})
+            end = (
+                leaders[block_index + 1] - 1
+                if block_index + 1 < len(leaders)
+                else len(program.instructions) - 1
+            )
+            blocks.append(
+                {"id": block_index, "start": start, "end": end, "successors": []}
+            )
         return blocks
 
-    def _successor_instructions(self, program: Program, index: int, instruction) -> list[int]:
+    def _successor_instructions(
+        self, program: Program, index: int, instruction
+    ) -> list[int]:
         flow = self.instruction_set.definition(instruction.opcode)["flow"]
         count = len(program.instructions)
         if flow in {"halt", "return"}:
             return []
         if flow == "jump":
-            target = instruction.operands[0]
-            return [program.labels[target] if isinstance(target, str) else target]
+            return [_target_index(program, instruction.operands[0])]
         if flow in {"conditional", "call"}:
-            target = instruction.operands[0]
-            result = [program.labels[target] if isinstance(target, str) else target]
+            result = [_target_index(program, instruction.operands[0])]
             if index + 1 < count:
                 result.append(index + 1)
             return result
@@ -153,4 +193,7 @@ class ProgramAnalyzer:
         return reached
 
     def _format_registers(self, registers: dict[str, int]) -> str:
-        return ", ".join(f"{name}({count})" for name, count in registers.items()) or "(none)"
+        return (
+            ", ".join(f"{name}({count})" for name, count in registers.items())
+            or "(none)"
+        )

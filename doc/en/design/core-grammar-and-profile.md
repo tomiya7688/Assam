@@ -42,7 +42,7 @@ The Full parser satisfies the following.
 1. The comment `;` is determined by tracking quote and escape state. `;` and `#` inside quotes are preserved as literals.
 2. A quoted operand is always stored as `string`, and is not converted even if its content looks numeric (`"123"`) or like a register (`"r1"`).
 3. The empty string `""` can be stored.
-4. Escapes are `\"`, `\\`, `\n`, `\t`, `\r`, `\xHH`. Undefined escapes and unclosed quotes are diagnostic errors.
+4. Escapes are `\"`, `\\`, `\n`, `\t`, `\r`, `\xHH`, `\uHHHH`. Undefined escapes and unclosed quotes are diagnostic errors.
 5. The VM distinguishes register references from strings by the operand `kind`. `_value` branches on type and never reinterprets a string as a number/register.
 
 In Core no instruction accepts a `string` operand. This is not a reason to add string-processing instructions to Core (DEC-17).

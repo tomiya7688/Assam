@@ -36,11 +36,11 @@ Assam provides:
 
 ## 3. Profile system
 
-| profile | version | status                        | description                                                                                                                         |
-| ------- | ------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `full`  | current | maintained                    | PascalCase, case-insensitive, whitespace-separated, r0-r15, Push/Pop, terminal instructions. Backward compatibility is maintained   |
-| `core`  | `draft` | **to be deprecated**          | The current Draft. r0-r15, arbitrary-precision integers, hidden call stack, sparse memory. Deprecated when Core v1 is complete (Q4) |
-| `core`  | `1`     | **new implementation target** | Bitlang VM Core v1 consumer contract. [Grammar](core-grammar-and-profile.md), [semantics](core-semantics.md)                        |
+| profile | version | status                        | description                                                                                                                                                    |
+| ------- | ------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `full`  | current | maintained                    | PascalCase, case-insensitive, whitespace-separated, r0-r31 (typed operands since WP-B1), Push/Pop, terminal instructions. Backward compatibility is maintained |
+| `core`  | `draft` | **to be deprecated**          | The current Draft. r0-r31 (since WP-B1), arbitrary-precision integers, hidden call stack, sparse memory. Deprecated when Core v1 is complete (Q4)              |
+| `core`  | `1`     | **new implementation target** | Bitlang VM Core v1 consumer contract. [Grammar](core-grammar-and-profile.md), [semantics](core-semantics.md)                                                   |
 
 The JSON IR profile marker (`{"name","version","registry_schema_version"}`) continues and is made able to express `core`/`1` (registry schema v3, [registry](registry-and-conformance.md)). Existing JSON without a marker remains `full`.
 

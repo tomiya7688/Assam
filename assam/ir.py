@@ -163,6 +163,9 @@ def operand_from_dict(value: Any) -> Operand:
     kind = value["kind"]
     if kind not in _OPERAND_KEYS:
         raise ValueError(f"unknown operand kind: {kind!r}")
+    missing = _OPERAND_KEYS[kind] - set(value)
+    if missing:
+        raise ValueError(f"missing keys for {kind} operand: {sorted(missing)}")
     extra = set(value) - _OPERAND_KEYS[kind]
     if extra:
         raise ValueError(f"unexpected keys for {kind} operand: {sorted(extra)}")

@@ -145,6 +145,17 @@ class OperandJsonTests(unittest.TestCase):
                 }
             )
 
+    def test_missing_key_in_tagged_operand_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "missing keys"):
+            Program.from_dict(
+                {
+                    "schema_version": 2,
+                    "instructions": [
+                        {"opcode": "Move", "operands": [{"kind": "register"}]}
+                    ],
+                }
+            )
+
     def test_unsupported_schema_version_is_rejected(self):
         with self.assertRaises(ValueError):
             Program.from_dict({"schema_version": 3, "instructions": []})

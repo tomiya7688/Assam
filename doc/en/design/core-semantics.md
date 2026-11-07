@@ -116,7 +116,7 @@ Rejected before execution: unknown opcode, operand count/kind violation, registe
 
 Core satisfies the following through lowering, **without adding them as instructions** (DEC-09).
 
-- **checked overflow**: For signed addition `c = a + b`, overflow is detected by testing `((a ^ c) & (b ^ c)) < 0` with `xor`/`and`/`slt`, and branching to `trap` if true. For multiplication overflow, use `mulhs` (PRO-16) and compare the upper 64 bits with the sign extension.
+- **checked overflow**: For signed addition `c = a + b`, overflow is detected by testing `((a ^ c) & (b ^ c)) < 0` with `xor`/`and`/`slt`, and branching to `trap` if true. For signed multiplication overflow, use `mulhs` (PRO-16) and compare the upper 64 bits with the sign extension of the lower 64 bits; for unsigned 64-bit multiplication, branch to `trap` when the `mulhu` result is non-zero.
   Example (`c` is the sum): `add c, a, b` / `xor t1, a, c` / `xor t2, b, c` / `and t1, t1, t2` / `slt t1, t1, r0` / `brnz t1, overflow`.
 - **Arbitrary semantic widths** (8/16/32 bit, etc.): after a 64-bit operation, sign/zero-extend with `shl` + `sar`/`shr` to preserve the width.
 - **Beyond 64 bits** (including x*): the backend lowers to a limb sequence (64-bit words), and carry/borrow is obtained with `sltu`. Example: 128-bit addition `(hi,lo)=(ah,al)+(bh,bl)` is `add lo`, `sltu c, lo, al`, `add hi`, `add hi, hi, c`.

@@ -116,7 +116,7 @@
 
 Coreは次を**命令として追加せず**、loweringで満たす（DEC-09）。
 
-- **checked overflow**: 符号付き加算`c = a + b`のoverflowは、`xor`/`and`/`slt`で`((a ^ c) & (b ^ c)) < 0`を判定し、真なら`trap`へ分岐する。乗算overflowは`mulhs`（PRO-16）で上位64bitを符号拡張と比較する。
+- **checked overflow**: 符号付き加算`c = a + b`のoverflowは、`xor`/`and`/`slt`で`((a ^ c) & (b ^ c)) < 0`を判定し、真なら`trap`へ分岐する。符号付き乗算のoverflowは`mulhs`（PRO-16）で上位64bitを下位64bitの符号拡張と比較して判定し、符号なし64bit乗算のoverflowは`mulhu`の結果が非0なら`trap`へ分岐する。
   例（`c`は加算結果）: `add c, a, b` / `xor t1, a, c` / `xor t2, b, c` / `and t1, t1, t2` / `slt t1, t1, r0` / `brnz t1, overflow`。
 - **任意の意味幅**（8/16/32bit等）: 64bit演算後に`shl`+`sar`/`shr`で符号/ゼロ拡張して幅を保つ。
 - **64bit超**（x*を含む）: backendがlimb列（64bit word）へlowerし、carry/borrowは`sltu`で得る。例: 128bit加算`(hi,lo)=(ah,al)+(bh,bl)`は`add lo`・`sltu c, lo, al`・`add hi`・`add hi, hi, c`。

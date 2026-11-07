@@ -189,6 +189,11 @@ def _check_entry(item) -> dict:
         or effects.get("control") not in _CONTROL
     ):
         raise _fail(f"bad effects: {ident}")
+    full_names = item.get("full_names", [])
+    if not isinstance(full_names, list) or any(
+        not _is_str(name) for name in full_names
+    ):
+        raise _fail(f"bad full_names: {ident}")
     if item.get("classification", "ordinary") not in _CLASSIFICATIONS:
         raise _fail(f"bad classification: {ident}")
     mapping_id = item.get("target_mapping_id")

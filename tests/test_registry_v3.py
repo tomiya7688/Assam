@@ -131,6 +131,9 @@ class RegistryConsistencyTests(unittest.TestCase):
         def full_only_with_mapping(r):
             self.entry("full.push")["target_mapping_id"] = "assam.core.draft.push"
 
+        def full_names_not_strings(r):
+            self.entry("core.add")["full_names"] = [None]
+
         def bad_schema_version(r):
             r["schema_version"] = 2
 
@@ -139,7 +142,7 @@ class RegistryConsistencyTests(unittest.TestCase):
 
         for change in (
             duplicate_id, duplicate_mapping_id, unknown_trap, full_name_collision, full_names_collide_each_other,
-            alias_collision, mapping_id_not_matching_mnemonic, full_only_with_mapping, bad_schema_version,
+            alias_collision, mapping_id_not_matching_mnemonic, full_only_with_mapping, bad_schema_version, full_names_not_strings,
             missing_execution_entry,
         ):  # fmt: skip
             with self.subTest(change.__name__):

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "full.branch.equal-taken-forward",
+  "category": "execution",
+  "profile": {
+    "name": "full"
+  },
+  "description": "Migrated from conditional-branches.json (#8).",
+  "source": {
+    "text": "JumpEqual done 1 1\nStore 90 1\ndone:\nHalt"
+  },
+  "environment": {
+    "max_steps": 10000
+  },
+  "expect": {
+    "status": "halted",
+    "memory": {}
+  }
+}

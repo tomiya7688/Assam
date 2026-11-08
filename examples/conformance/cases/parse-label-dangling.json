@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.label-dangling",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "halt\nend:\n"
+  },
+  "expect": {
+    "accepted": false,
+    "diagnostics": [
+      {
+        "code": "core.syntax.label_dangling",
+        "line": 2
+      }
+    ]
+  }
+}

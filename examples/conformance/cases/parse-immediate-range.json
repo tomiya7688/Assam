@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.immediate-range",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "const r1, 18446744073709551616\n"
+  },
+  "expect": {
+    "accepted": false,
+    "diagnostics": [
+      {
+        "code": "core.syntax.immediate_range",
+        "line": 1
+      }
+    ]
+  }
+}

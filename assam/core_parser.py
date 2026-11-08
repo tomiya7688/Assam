@@ -46,15 +46,11 @@ class CoreParser:
         if lines and lines[-1] == "":
             lines.pop()  # 末尾の改行で生じる空要素
         if text.startswith("﻿"):
+            # BOMは1件だけ報告し、以降の行検査からは外す
             diagnostics.append(
-                CoreDiagnostic(
-                    "core.syntax.encoding",
-                    "BOM is not allowed",
-                    1,
-                    1,
-                    lines[0] if lines else "",
-                )
+                CoreDiagnostic("core.syntax.encoding", "BOM is not allowed", 1, 1, lines[0])
             )
+            lines[0] = lines[0][1:]
         for number, raw in enumerate(lines, 1):
             line = raw[:-1] if raw.endswith("\r") else raw
             found = self._check_encoding(line, number)

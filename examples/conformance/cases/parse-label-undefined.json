@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.label-undefined",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "jump nowhere\n"
+  },
+  "expect": {
+    "accepted": false,
+    "diagnostics": [
+      {
+        "code": "core.syntax.label_undefined",
+        "line": 1
+      }
+    ]
+  }
+}

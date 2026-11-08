@@ -109,6 +109,7 @@ A2 ─ B1 ─ B3 ─ B2 ─┐
 ### B5 conformance corpus and runner (#8, #13)
 
 - Design: [Registry and conformance §3](registry-and-conformance.md)
+- Status: implemented. Cases are under `examples/conformance/cases/` (parse and Full execution; Core execution waits for B4). The legacy `conditional-branches.json` was migrated and removed. Runner: `assam conformance run [--impl CMD]`, which calls `<impl> conformance-case <case.json>` for external implementations.
 - Deliverables: new format under `examples/conformance/`, migration of existing `conditional-branches.json`, `assam conformance run`, the `conformance-case` protocol, initial corpus (build parse/Full execution first).
 - Acceptance: the runner compares expected and actual, and exits non-zero on mismatch. Corpus format schema. Core v1 execution cases are added in parallel with B4 (B4 follows this via TDD).
 

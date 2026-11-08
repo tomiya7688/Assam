@@ -32,6 +32,12 @@ def main(argv=None):
     matrix.add_argument("--format",choices=("text","json"),default="text",help="report format")
     scaffold=sub.add_parser("scaffold-target-coverage",help="print a review-required coverage manifest for one target")
     scaffold.add_argument("architecture"); scaffold.add_argument("profile"); scaffold.add_argument("--registry",type=Path,help="instruction registry JSON (defaults to the bundled registry)")
+    conformance=sub.add_parser("conformance",help="run the shared conformance corpus")
+    conformance_sub=conformance.add_subparsers(dest="conformance_command",required=True)
+    conformance_run=conformance_sub.add_parser("run",help="run every case and compare with its expectation")
+    conformance_run.add_argument("--cases",type=Path,default=Path(__file__).resolve().parents[1]/"examples/conformance/cases",help="case directory")
+    conformance_run.add_argument("--impl",help="external implementation command; it is called as '<impl> conformance-case <case.json>'")
+    conformance_run.add_argument("--format",choices=("text","json"),default="text")
     args=parser.parse_args(argv)
     try:
         if args.command=="run":
@@ -73,6 +79,15 @@ def main(argv=None):
         elif args.command=="scaffold-target-coverage":
             manifest=build_target_coverage_template(args.architecture,args.profile,args.registry)
             print(json.dumps(manifest,ensure_ascii=False,indent=2))
+        elif args.command=="conformance":
+            from .conformance_runner import ConformanceRunner
+            report=ConformanceRunner(impl=args.impl).run_directory(args.cases)
+            if args.format=="json": print(json.dumps(report,ensure_ascii=False,indent=2))
+            else:
+                print(f"conformance: {report['passed']}/{report['total']} passed, {report['failed']} failed")
+                for item in report["results"]:
+                    if item["status"]!="passed": print(f"  {item['status']}: {item['id']}")
+            return 0 if report["failed"]==0 else 1
         else:
             program=read(args.file) if args.ir_json else parse_program(args.file.read_text(encoding="utf-8"))
             analyzer=ProgramAnalyzer()

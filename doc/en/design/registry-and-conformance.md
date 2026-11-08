@@ -110,7 +110,7 @@ Place one case per JSON file under `examples/conformance/`. Multiple VMs and tra
 - `parse`: the expectation is `{"accepted": true, "canonical": "..."}` or `{"accepted": false, "diagnostics": [{"code","line"}]}`.
 - `execution`: the expectation is the observed JSON of [Core semantics, section 3](core-semantics.md) (`status`, `trap`, `registers`, `memory_sha256`).
 - `translation`: the expected instruction sequence (golden) per target/profile. Execution equivalence is separate ([target translation](target-translation.md)).
-- The current `examples/conformance/conditional-branches.json` (for Draft/Full) is migrated to the new format and kept, with Full stated explicitly in `profile`.
+- The former `examples/conformance/conditional-branches.json` (for Draft/Full) is migrated to one-case-per-file under `examples/conformance/cases/` (`full-branch-*.json`, with `profile` set to Full explicitly) and the old file is removed. Status: implemented (WP-B5); `assam conformance run [--impl CMD]`. Only `parse` and Full `execution` cases exist; Core execution cases wait for WP-B4.
 
 ### 3.2 Required categories
 

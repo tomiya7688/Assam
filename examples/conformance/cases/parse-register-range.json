@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.register-range",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "mov r32, r1\n"
+  },
+  "expect": {
+    "accepted": false,
+    "diagnostics": [
+      {
+        "code": "core.syntax.register_range",
+        "line": 1
+      }
+    ]
+  }
+}

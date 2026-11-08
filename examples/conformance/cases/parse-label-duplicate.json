@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.label-duplicate",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "a:\n    halt\na:\n    halt\n"
+  },
+  "expect": {
+    "accepted": false,
+    "diagnostics": [
+      {
+        "code": "core.syntax.label_duplicate",
+        "line": 3
+      }
+    ]
+  }
+}

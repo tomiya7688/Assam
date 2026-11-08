@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.hex-and-crlf",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "const r1, 0x2A\r\nhalt\r\n"
+  },
+  "expect": {
+    "accepted": true,
+    "canonical": "    const r1, 42\n    halt\n"
+  }
+}

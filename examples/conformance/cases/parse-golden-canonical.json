@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "parse.core1.golden-canonical",
+  "category": "parse",
+  "profile": {
+    "name": "core",
+    "version": "1"
+  },
+  "description": "Core v1 parse conformance case (WP-B5).",
+  "source": {
+    "text": "entry:\n    const r1, 7\n    const r2, 1\nloop:\n    brz r1, done\n    sub r1, r1, r2\n    jump loop\ndone:\n    halt\n"
+  },
+  "expect": {
+    "accepted": true,
+    "canonical": "entry:\n    const r1, 7\n    const r2, 1\nloop:\n    brz r1, done\n    sub r1, r1, r2\n    jump loop\ndone:\n    halt\n"
+  }
+}

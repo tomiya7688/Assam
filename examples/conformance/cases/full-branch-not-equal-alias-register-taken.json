@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "full.branch.not-equal-alias-register-taken",
+  "category": "execution",
+  "profile": {
+    "name": "full"
+  },
+  "description": "Migrated from conditional-branches.json (#8).",
+  "source": {
+    "text": "Move r0 1\nMove r1 2\nJne done r0 r1\nStore 92 1\ndone:\nHalt"
+  },
+  "environment": {
+    "max_steps": 10000
+  },
+  "expect": {
+    "status": "halted",
+    "memory": {}
+  }
+}

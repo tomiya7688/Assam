@@ -110,7 +110,7 @@ registryは**命令契約と対応情報**の正本であり、実行ロジッ�
 - `parse`: 期待は`{"accepted": true, "canonical": "..."}` または`{"accepted": false, "diagnostics": [{"code","line"}]}`。
 - `execution`: 期待は[Core意味論 §3](Core意味論.md)の観測JSON（`status`, `trap`, `registers`, `memory_sha256`）。
 - `translation`: ターゲット/profile別の期待命令列（golden）。実行等価は別（[ターゲット変換](ターゲット変換.md)）。
-- 現行の`examples/conformance/conditional-branches.json`（Draft/Full向け）は、新形式に移行し、`profile`でFullを明示して残す。
+- 従来の`examples/conformance/conditional-branches.json`（Draft/Full向け）は、1ケース1ファイルの`examples/conformance/cases/`（`full-branch-*.json`、`profile`でFullを明示）へ移行し、旧ファイルは削除した。状態: 実装済み（WP-B5）。`assam conformance run [--impl CMD]`で実行する。現時点のケースは`parse`とFull `execution`のみで、Core実行ケースはWP-B4待ち。
 
 ### 3.2 必須カテゴリ
 
